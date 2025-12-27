@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medrunner Assistant - Einstellungen</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚑 Medrunner Assistant</h1>
+            <div class="header-actions">
+                <div class="status-indicator" id="status-indicator">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="status-text">Gestoppt</span>
+                </div>
+                <button class="btn btn-primary" id="start-stop-btn">Start</button>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="auth">Authentifizierung</button>
+            <button class="tab-btn" data-tab="sounds">Sound-Dateien</button>
+            <button class="tab-btn" data-tab="features">Features</button>
+            <button class="tab-btn" data-tab="overlay">Overlay</button>
+            <button class="tab-btn" data-tab="join-order">Join Order</button>
+            <button class="tab-btn" data-tab="advanced">Erweitert</button>
+        </div>
+
+        <main>
+            <!-- Auth Tab -->
+            <div class="tab-content active" data-tab="auth">
+                <h2>API-Authentifizierung</h2>
+                <p class="description">
+                    Hol dir deinen Token im Staff Portal unter deinem Medrunner-Profil.
+                </p>
+                <div class="form-group">
+                    <label for="medrunner-token">Medrunner API Token *</label>
+                    <input type="password" id="medrunner-token" placeholder="MRA.3/..." required>
+                    <button type="button" class="btn-icon" id="toggle-token" title="Token anzeigen/verbergen">
+                        👁️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sounds Tab -->
+            <div class="tab-content" data-tab="sounds">
+                <h2>Sound-Dateien</h2>
+                <p class="description">
+                    Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.
+                </p>
+
+                <div class="form-group">
+                    <label for="alert-sound">Alert-Sound</label>
+                    <div class="file-input-group">
+                        <input type="text" id="alert-sound" placeholder="./sounds/alert.wav">
+                        <button type="button" class="btn btn-secondary" data-select="alert-sound">Durchsuchen</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="chat-sound">Chat-Nachricht Sound</label>
+                    <div class="file-input-group">
+                        <input type="text" id="chat-sound" placeholder="./sounds/chat.wav">
+                        <button type="button" class="btn btn-secondary" data-select="chat-sound">Durchsuchen</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="team-sound">Team-Beitritt Sound</label>
+                    <div class="file-input-group">
+                        <input type="text" id="team-sound" placeholder="./sounds/team.wav">
+                        <button type="button" class="btn btn-secondary" data-select="team-sound">Durchsuchen</button>
+                    </div>
+                </div>
+
+                <div class="available-sounds" id="available-sounds">
+                    <h3>Verfügbare Sounds im sounds/-Ordner:</h3>
+                    <div class="sound-list" id="sound-list">
+                        <p class="muted">Keine Sounds gefunden</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Tab -->
+            <div class="tab-content" data-tab="features">
+                <h2>Features aktivieren/deaktivieren</h2>
+                <p class="description">
+                    Aktiviere oder deaktiviere einzelne Features nach Bedarf.
+                </p>
+
+                <div class="feature-list">
+                    <div class="feature-item">
+                        <div class="feature-info">
+                            <h3>Custom Alert Sound</h3>
+                            <p>Spielt einen benutzerdefinierten Sound bei neuen Alerts ab</p>
+                        </div>
+                        <div class="feature-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="enable-alert-sound">
+                                <span class="slider"></span>
+                            </label>
+                            <button class="btn btn-test" data-test="alert-sound">Test 1</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-info">
+                            <h3>Custom Chat Message Sound</h3>
+                            <p>Spielt einen Sound bei eingehenden Client-Nachrichten</p>
+                        </div>
+                        <div class="feature-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="enable-chat-message-sound">
+                                <span class="slider"></span>
+                            </label>
+                            <button class="btn btn-test" data-test="chat-message-sound">Test 2</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-info">
+                            <h3>Custom Team Join Sound</h3>
+                            <p>Benachrichtigt dich, wenn jemand deinem Team beitreten möchte</p>
+                        </div>
+                        <div class="feature-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="enable-team-sound">
+                                <span class="slider"></span>
+                            </label>
+                            <button class="btn btn-test" data-test="team-join-sound">Test 3</button>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-info">
+                            <h3>Print Ship Assignments</h3>
+                            <p>Zeigt Schiffszuweisungen in der Konsole an</p>
+                        </div>
+                        <div class="feature-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="enable-ship-assignments">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-info">
+                            <h3>Print Team Join Order</h3>
+                            <p>Zeigt die Reihenfolge der Team-Beitritte an</p>
+                        </div>
+                        <div class="feature-controls">
+                            <label class="switch">
+                                <input type="checkbox" id="enable-team-order">
+                                <span class="slider"></span>
+                            </label>
+                            <button class="btn btn-test" data-test="team-order">Test 4</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overlay Tab -->
+            <div class="tab-content" data-tab="overlay">
+                <h2>Overlay Einstellungen</h2>
+                <p class="description">
+                    Konfiguriere das visuelle Overlay für Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.
+                </p>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <h3>Overlay aktivieren</h3>
+                        <p>Zeigt visuelles Feedback bei neuen Alerts</p>
+                    </div>
+                    <div class="feature-controls">
+                        <label class="switch">
+                            <input type="checkbox" id="enable-overlay">
+                            <span class="slider"></span>
+                        </label>
+                        <button class="btn btn-test" data-test="alert-overlay">Test 5</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="overlay-duration">Dauer (ms)</label>
+                    <input type="number" id="overlay-duration" min="500" step="100" value="3000" placeholder="3000" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                </div>
+
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label for="overlay-text-percent">Textgröße (%) — 100% entspricht Größe 400</label>
+                    <input type="number" id="overlay-text-percent" min="10" max="500" step="5" value="100" placeholder="100" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label>Monitor-Modus</label>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="overlay-mode" value="single" checked>
+                            Einzelner Monitor
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="overlay-mode" value="all">
+                            Alle Monitore
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" id="monitor-select-group">
+                    <label for="overlay-monitor">Monitor auswählen</label>
+                    <select id="overlay-monitor" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                        <option value="0">Lädt...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <label>Text-Position & Effekt</label>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="overlay-position" value="top" checked>
+                            Oben (Slider + Puls)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 0.5rem;">
+                            <input type="radio" name="overlay-position" value="center">
+                            Mitte (Einblendung + Puls)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div>
+                        <label for="overlay-border-style">Randstil</label>
+                        <select id="overlay-border-style" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            <option value="none">Keiner</option>
+                            <option value="glow">Rot leuchtender Rand</option>
+                            <option value="waves">Rote Wellen am Rand</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="overlay-background-style">Hintergrund</label>
+                        <select id="overlay-background-style" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            <option value="none">Keiner</option>
+                            <option value="red80">Roter Hintergrund (80%)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join Order Tab -->
+            <div class="tab-content" data-tab="join-order">
+                <h2>Team Join Order</h2>
+                <p class="description">
+                    Zeigt die Reihenfolge, in der Mitglieder dem Team beigetreten sind.
+                </p>
+
+                <div class="join-order-list" id="join-order-list">
+                    <p class="muted">Keine Daten verfügbar. Starte den Assistant, um die Team-Beitritte zu sehen.</p>
+                </div>
+            </div>
+
+            <!-- Advanced Tab -->
+            <div class="tab-content" data-tab="advanced">
+                <h2>Erweiterte Einstellungen</h2>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <h3>Debug-Modus</h3>
+                        <p>Zeigt zusätzliche Debug-Informationen in der Konsole</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="debug-mode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <h3>Test Mode</h3>
+                        <p>Wenn aktiviert, werden alle Test-Buttons sichtbar.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="test-mode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <h3>Alert Test Full</h3>
+                        <p>Spielt Alert-Sound und zeigt Overlay gemäß Monitor-Auswahl.</p>
+                    </div>
+                    <div class="feature-controls">
+                        <button type="button" class="btn btn-primary" id="alert-test-full">Alert-Test ausführen</button>
+                    </div>
+                </div>
+
+                <div class="log-section">
+                    <h3>Konsolen-Ausgabe</h3>
+                    <div class="log-output" id="log-output">
+                        <p class="muted">Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.</p>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="clear-logs">Logs löschen</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <button class="btn btn-success" id="save-btn">💾 Einstellungen speichern</button>
+            <div class="save-status" id="save-status"></div>
+        </footer>
+    </div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
