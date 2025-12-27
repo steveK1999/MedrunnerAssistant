@@ -1,5 +1,6 @@
 import { getSelf } from "../lib/medrunnerAPI.js";
 import { playAudio } from "../lib/playAudio.js";
+import { resolveAudioPath } from "../lib/resolveAudioPath.js";
 
 export const event = "TeamUpdate";
 
@@ -20,11 +21,25 @@ export async function callback(teamUpdate) {
 				console.log("After accepting this request, the team will be " + (teamUpdate.members.length + teamUpdate.waitList.length) + " people big");
 			});
 			try {
-				await playAudio(process.env.CUSTOM_TEAMJOIN_SOUND);
+				const audioPath = resolveAudioPath(process.env.CUSTOM_TEAMJOIN_SOUND);
+				const durationMs = process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS, 10) : 0;
+				await playAudio(audioPath, durationMs);
 				console.log("Playback finished for teamupdate.");
 			} catch (e) {
 				console.error("Failed to play audio:", e);
 			}
 		}
+	}
+}
+
+export async function test(number) {
+	console.log(`\n*** TEST MODE: Team Join Sound ${number} ***`);
+	try {
+		const audioPath = resolveAudioPath(process.env.CUSTOM_TEAMJOIN_SOUND);
+		const durationMs = process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS, 10) : 0;
+		await playAudio(audioPath, durationMs);
+		console.log("Test team join sound played successfully!");
+	} catch (e) {
+		console.error("Test failed:", e.message);
 	}
 }
