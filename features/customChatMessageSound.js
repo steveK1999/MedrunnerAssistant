@@ -17,7 +17,8 @@ export async function callback(chatMessage) {
 	if (self.data.id !== chatMessage.senderId && self.data.activeClass == 4) {
 		try {
 			const audioPath = resolveAudioPath(process.env.CUSTOM_CHATMESSAGE_SOUND);
-			await playAudio(audioPath);
+			const durationMs = process.env.CUSTOM_CHATMESSAGE_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_CHATMESSAGE_SOUND_DURATION_MS, 10) : 0;
+			await playAudio(audioPath, durationMs);
 			console.log("Playback finished for chatmessage.");
 		} catch (e) {
 			console.error("Failed to play audio:", e);
@@ -29,7 +30,8 @@ export async function test(number) {
 	console.log(`\n*** TEST MODE: Chat Message Sound ${number} ***`);
 	try {
 		const audioPath = resolveAudioPath(process.env.CUSTOM_CHATMESSAGE_SOUND);
-		await playAudio(audioPath);
+		const durationMs = process.env.CUSTOM_CHATMESSAGE_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_CHATMESSAGE_SOUND_DURATION_MS, 10) : 0;
+		await playAudio(audioPath, durationMs);
 		console.log("Test chat message sound played successfully!");
 	} catch (e) {
 		console.error("Test failed:", e.message);

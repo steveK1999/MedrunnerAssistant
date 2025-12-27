@@ -20,32 +20,17 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" data-tab="auth">Authentifizierung</button>
-            <button class="tab-btn" data-tab="sounds">Sound-Dateien</button>
+            <button class="tab-btn active" data-tab="sounds">Sound-Dateien</button>
             <button class="tab-btn" data-tab="features">Features</button>
             <button class="tab-btn" data-tab="overlay">Overlay</button>
             <button class="tab-btn" data-tab="join-order">Join Order</button>
-            <button class="tab-btn" data-tab="advanced">Erweitert</button>
+            <button class="tab-btn" data-tab="settings">Einstellungen</button>
+            <button class="tab-btn" data-tab="console" style="display: none;" id="console-tab-btn">Konsole</button>
         </div>
 
         <main>
-            <!-- Auth Tab -->
-            <div class="tab-content active" data-tab="auth">
-                <h2>API-Authentifizierung</h2>
-                <p class="description">
-                    Hol dir deinen Token im Staff Portal unter deinem Medrunner-Profil.
-                </p>
-                <div class="form-group">
-                    <label for="medrunner-token">Medrunner API Token *</label>
-                    <input type="password" id="medrunner-token" placeholder="MRA.3/..." required>
-                    <button type="button" class="btn-icon" id="toggle-token" title="Token anzeigen/verbergen">
-                        👁️
-                    </button>
-                </div>
-            </div>
-
             <!-- Sounds Tab -->
-            <div class="tab-content" data-tab="sounds">
+            <div class="tab-content active" data-tab="sounds">
                 <h2>Sound-Dateien</h2>
                 <p class="description">
                     Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.
@@ -73,6 +58,28 @@
                         <input type="text" id="team-sound" placeholder="./sounds/team.wav">
                         <button type="button" class="btn btn-secondary" data-select="team-sound">Durchsuchen</button>
                     </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3>Sound-Dauer (Millisekunden)</h3>
+                <p class="description">
+                    Begrenzen Sie die Wiedergabedauer der Sounds. Geben Sie 0 ein für unbegrenzte Wiedergabe.
+                </p>
+
+                <div class="form-group">
+                    <label for="alert-sound-duration">Alert-Sound Dauer (ms)</label>
+                    <input type="number" id="alert-sound-duration" min="0" step="100" value="0" placeholder="0 = unbegrenzt" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                </div>
+
+                <div class="form-group">
+                    <label for="chat-sound-duration">Chat-Nachricht Sound Dauer (ms)</label>
+                    <input type="number" id="chat-sound-duration" min="0" step="100" value="0" placeholder="0 = unbegrenzt" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                </div>
+
+                <div class="form-group">
+                    <label for="team-sound-duration">Team-Beitritt Sound Dauer (ms)</label>
+                    <input type="number" id="team-sound-duration" min="0" step="100" value="0" placeholder="0 = unbegrenzt" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
                 </div>
 
                 <div class="available-sounds" id="available-sounds">
@@ -184,30 +191,11 @@
                 </div>
 
                 <div class="form-group" style="margin-top: 1rem;">
-                    <label for="overlay-duration">Dauer (ms)</label>
-                    <input type="number" id="overlay-duration" min="500" step="100" value="3000" placeholder="3000" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-                </div>
-
-                <div class="form-group" style="margin-top: 1rem;">
                     <label for="overlay-text-percent">Textgröße (%) — 100% entspricht Größe 400</label>
                     <input type="number" id="overlay-text-percent" min="10" max="500" step="5" value="100" placeholder="100" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
                 </div>
 
-                <div class="form-group" style="margin-top: 2rem;">
-                    <label>Monitor-Modus</label>
-                    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="radio" name="overlay-mode" value="single" checked>
-                            Einzelner Monitor
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 0.5rem;">
-                            <input type="radio" name="overlay-mode" value="all">
-                            Alle Monitore
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-group" id="monitor-select-group">
+                <div class="form-group" style="margin-top: 1rem;">
                     <label for="overlay-monitor">Monitor auswählen</label>
                     <select id="overlay-monitor" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
                         <option value="0">Lädt...</option>
@@ -240,8 +228,7 @@
                     <div>
                         <label for="overlay-background-style">Hintergrund</label>
                         <select id="overlay-background-style" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-                            <option value="none">Keiner</option>
-                            <option value="red80">Roter Hintergrund (80%)</option>
+                            <option value="none">Transparent (Monitor sichtbar)</option>
                         </select>
                     </div>
                 </div>
@@ -259,9 +246,37 @@
                 </div>
             </div>
 
-            <!-- Advanced Tab -->
-            <div class="tab-content" data-tab="advanced">
-                <h2>Erweiterte Einstellungen</h2>
+            <!-- Settings Tab -->
+            <div class="tab-content" data-tab="settings">
+                <h2>Einstellungen</h2>
+
+                <div class="form-group">
+                    <label for="medrunner-token">Medrunner API Token *</label>
+                    <p class="description" style="margin-top: -0.5rem; margin-bottom: 0.5rem; font-size: 0.9em;">
+                        Hol dir deinen Token im Staff Portal unter deinem Medrunner-Profil.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input type="password" id="medrunner-token" placeholder="MRA.3/..." required>
+                        <button type="button" class="btn-icon" id="toggle-token" title="Token anzeigen/verbergen">
+                            👁️
+                        </button>
+                    </div>
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3>Overlay-Dauer (Millisekunden)</h3>
+                <p class="description">
+                    Bestimme, wie lange das Alert-Overlay angezeigt wird.
+                </p>
+                <div class="form-group">
+                    <label for="overlay-duration">Dauer (ms)</label>
+                    <input type="number" id="overlay-duration" min="500" step="100" value="3000" placeholder="3000" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                </div>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <h3>Debug & Test Optionen</h3>
 
                 <div class="feature-item">
                     <div class="feature-info">
@@ -294,14 +309,18 @@
                         <button type="button" class="btn btn-primary" id="alert-test-full">Alert-Test ausführen</button>
                     </div>
                 </div>
+            </div>
 
-                <div class="log-section">
-                    <h3>Konsolen-Ausgabe</h3>
-                    <div class="log-output" id="log-output">
-                        <p class="muted">Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.</p>
-                    </div>
-                    <button type="button" class="btn btn-secondary" id="clear-logs">Logs löschen</button>
+            <!-- Console Tab -->
+            <div class="tab-content" data-tab="console">
+                <h2>Konsolen-Ausgabe</h2>
+                <p class="description">
+                    Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.
+                </p>
+                <div class="log-output" id="log-output">
+                    <p class="muted">Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.</p>
                 </div>
+                <button type="button" class="btn btn-secondary" id="clear-logs">Logs löschen</button>
             </div>
         </main>
 

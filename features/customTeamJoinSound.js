@@ -22,7 +22,8 @@ export async function callback(teamUpdate) {
 			});
 			try {
 				const audioPath = resolveAudioPath(process.env.CUSTOM_TEAMJOIN_SOUND);
-				await playAudio(audioPath);
+				const durationMs = process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS, 10) : 0;
+				await playAudio(audioPath, durationMs);
 				console.log("Playback finished for teamupdate.");
 			} catch (e) {
 				console.error("Failed to play audio:", e);
@@ -35,7 +36,8 @@ export async function test(number) {
 	console.log(`\n*** TEST MODE: Team Join Sound ${number} ***`);
 	try {
 		const audioPath = resolveAudioPath(process.env.CUSTOM_TEAMJOIN_SOUND);
-		await playAudio(audioPath);
+		const durationMs = process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_TEAMJOIN_SOUND_DURATION_MS, 10) : 0;
+		await playAudio(audioPath, durationMs);
 		console.log("Test team join sound played successfully!");
 	} catch (e) {
 		console.error("Test failed:", e.message);

@@ -30,13 +30,15 @@ function initializeDOMElements() {
 		CUSTOM_ALERT_SOUND: document.getElementById('alert-sound'),
 		CUSTOM_CHATMESSAGE_SOUND: document.getElementById('chat-sound'),
 		CUSTOM_TEAMJOIN_SOUND: document.getElementById('team-sound'),
+		CUSTOM_ALERT_SOUND_DURATION_MS: document.getElementById('alert-sound-duration'),
+		CUSTOM_CHATMESSAGE_SOUND_DURATION_MS: document.getElementById('chat-sound-duration'),
+		CUSTOM_TEAMJOIN_SOUND_DURATION_MS: document.getElementById('team-sound-duration'),
 		ENABLE_CUSTOM_ALERT_SOUND: document.getElementById('enable-alert-sound'),
 		ENABLE_CUSTOM_CHATMESSAGE_SOUND: document.getElementById('enable-chat-message-sound'),
 		ENABLE_CUSTOM_TEAMJOIN_SOUND: document.getElementById('enable-team-sound'),
 		ENABLE_PRINT_SHIPASSIGNMENTS: document.getElementById('enable-ship-assignments'),
 		ENABLE_PRINT_TEAMJOINORDER: document.getElementById('enable-team-order'),
 		ENABLE_ALERT_OVERLAY: document.getElementById('enable-overlay'),
-		ALERT_OVERLAY_ALL_MONITORS: document.querySelector('input[name="overlay-mode"][value="all"]'),
 		ALERT_OVERLAY_MONITOR_INDEX: document.getElementById('overlay-monitor'),
 		OVERLAY_DURATION_MS: document.getElementById('overlay-duration'),
 		OVERLAY_TEXT_SIZE_PERCENT: document.getElementById('overlay-text-percent'),
@@ -102,18 +104,13 @@ function initializeDOMElements() {
 		});
 	});
 
-	// Monitor mode toggle
-	const overlayModeRadios = document.querySelectorAll('input[name="overlay-mode"]');
-	overlayModeRadios.forEach(radio => {
-		radio.addEventListener('change', (e) => {
-			const monitorGroup = document.getElementById('monitor-select-group');
-			if (e.target.value === 'all') {
-				monitorGroup.style.display = 'none';
-			} else {
-				monitorGroup.style.display = 'block';
-			}
+	// Debug mode toggle - show/hide console tab
+	const debugModeCheckbox = document.getElementById('debug-mode');
+	if (debugModeCheckbox) {
+		debugModeCheckbox.addEventListener('change', () => {
+			updateConsoleTabVisibility();
 		});
-	});
+	}
 
 	// Position helper (no extra UI behaviors needed yet)
 }
@@ -125,6 +122,7 @@ async function loadSettings() {
 		populateForm(currentSettings);
 		await loadAvailableSounds();
 		updateTestButtonsVisibility();
+		updateConsoleTabVisibility();
 	} catch (error) {
 		console.error('Failed to load settings:', error);
 		showStatus('Fehler beim Laden der Einstellungen', 'error');
@@ -138,18 +136,7 @@ function populateForm(settings) {
 		
 		const value = settings[key] || '';
 		
-		if (key === 'ALERT_OVERLAY_ALL_MONITORS') {
-			// Handle radio button for all monitors
-			const allMonitorsRadio = document.querySelector('input[name="overlay-mode"][value="all"]');
-			const singleRadio = document.querySelector('input[name="overlay-mode"][value="single"]');
-			if (value === 'true') {
-				allMonitorsRadio.checked = true;
-				document.getElementById('monitor-select-group').style.display = 'none';
-			} else {
-				singleRadio.checked = true;
-				document.getElementById('monitor-select-group').style.display = 'block';
-			}
-		} else if (key === 'OVERLAY_POSITION') {
+		if (key === 'OVERLAY_POSITION') {
 			const topRadio = document.querySelector('input[name="overlay-position"][value="top"]');
 			const centerRadio = document.querySelector('input[name="overlay-position"][value="center"]');
 			if (value === 'center') {
@@ -174,6 +161,15 @@ function updateTestButtonsVisibility() {
 	});
 }
 
+// Show/hide console tab depending on DEBUG_MODE
+function updateConsoleTabVisibility() {
+	const enabled = formElements.DEBUG_MODE && formElements.DEBUG_MODE.checked;
+	const consoleTab = document.getElementById('console-tab-btn');
+	if (consoleTab) {
+		consoleTab.style.display = enabled ? 'block' : 'none';
+	}
+}
+
 // Gather settings from form
 function gatherSettings() {
 	const settings = {};
@@ -186,7 +182,6 @@ function gatherSettings() {
 		} else if (key === 'ALERT_OVERLAY_ALL_MONITORS') {
 			// Handle radio button for all monitors
 			const allMonitorsRadio = document.querySelector('input[name="overlay-mode"][value="all"]');
-			settings[key] = allMonitorsRadio.checked ? 'true' : 'false';
 		} else if (key === 'OVERLAY_POSITION') {
 			const centerRadio = document.querySelector('input[name="overlay-position"][value="center"]');
 			settings[key] = centerRadio.checked ? 'center' : 'top';

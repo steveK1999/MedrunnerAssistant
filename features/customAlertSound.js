@@ -19,7 +19,8 @@ export async function callback(alert) {
 
 	try {
 		const audioPath = resolveAudioPath(process.env.CUSTOM_ALERT_SOUND);
-		await playAudio(audioPath);
+		const durationMs = process.env.CUSTOM_ALERT_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_ALERT_SOUND_DURATION_MS, 10) : 0;
+		await playAudio(audioPath, durationMs);
 		console.log("Playback finished for alert.");
 	} catch (e) {
 		console.error("Failed to play audio:", e);
@@ -39,7 +40,8 @@ export async function test(number) {
 	console.log(`\n*** TEST MODE: Custom Alert Sound ${number} ***`);
 	try {
 		const audioPath = resolveAudioPath(process.env.CUSTOM_ALERT_SOUND);
-		await playAudio(audioPath);
+		const durationMs = process.env.CUSTOM_ALERT_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_ALERT_SOUND_DURATION_MS, 10) : 0;
+		await playAudio(audioPath, durationMs);
 		console.log("Test alert sound played successfully!");
 	} catch (e) {
 		console.error("Test failed:", e.message);
