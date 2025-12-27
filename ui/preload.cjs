@@ -18,7 +18,8 @@ contextBridge.exposeInMainWorld("api", {
 	
 	// Testing
 	testFeature: (featureName, number) => ipcRenderer.invoke("test-feature", featureName, number),
-	getTeamOrder: () => ipcRenderer.invoke("get-team-order"),
+	getTeamMembers: () => ipcRenderer.invoke("get-team-members"),
+	testAlertFull: () => ipcRenderer.invoke("test-alert-full"),
 	
 	// Event listeners
 	onAssistantLog: (callback) => {
@@ -33,7 +34,7 @@ contextBridge.exposeInMainWorld("api", {
 	onMenuSave: (callback) => {
 		ipcRenderer.on("menu-save", () => callback());
 	},
-	onTeamOrderUpdate: (callback) => {
-		ipcRenderer.on("team-order-update", (event, order) => callback(order));
+	onTeamMembersUpdate: (callback) => {
+		ipcRenderer.on("team-members-update", (event, members) => callback(members));
 	},
 });

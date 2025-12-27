@@ -49,9 +49,9 @@ process.on("message", async (msg) => {
 		// Handle test requests
 		console.log(`\n[Test] Running test for: ${msg.feature}`);
 		
-		// Create a normalized version of the feature name for matching
+		// Create a normalized version of the feature name for matching (keep 'sound' so we don't confuse overlay with sound tests)
 		const normalizeFeatureName = (name) => {
-			return name.toLowerCase().replace(/[-_]/g, "").replace(/sound$/, "");
+			return name.toLowerCase().replace(/[-_]/g, "");
 		};
 		
 		const targetFeature = normalizeFeatureName(msg.feature);
@@ -72,11 +72,11 @@ process.on("message", async (msg) => {
 							} catch (error) {
 								console.error(`[Test] Error running test: ${error.message}`);
 							}
-							// Send team order if this was a team order test
-							if (module.lastTeamOrder) {
+							// Send team members if this was a team members test
+							if (module.lastTeamMembers) {
 								process.send({
-									type: "team-order",
-									data: module.lastTeamOrder
+									type: "team-members",
+									data: module.lastTeamMembers
 								});
 							}
 						} else {
@@ -87,16 +87,16 @@ process.on("message", async (msg) => {
 				}
 			}
 		}
-	} else if (msg.type === "get-team-order") {
-		// Get current team order from printTeamJoinOrder feature
+	} else if (msg.type === "get-team-members") {
+		// Get current team members from Team_Members feature
 		const files = fs.readdirSync(path.join(__dirname, "features"));
 		for (const file of files) {
 			if (file.endsWith(".js")) {
 				const module = await import(`./features/${file}`);
-				if (module.name === "Print_TeamJoinOrder" && module.lastTeamOrder) {
+				if (module.name === "Team_Members" && module.lastTeamMembers) {
 					process.send({
-						type: "team-order",
-						data: module.lastTeamOrder
+						type: "team-members",
+						data: module.lastTeamMembers
 					});
 					break;
 				}

@@ -6,7 +6,7 @@ const fs = require("fs");
 let mainWindow = null;
 let assistantProcess = null;
 let isRunning = false;
-let currentTeamOrder = [];
+let currentTeamMembers = [];
 
 // Get app paths that work both in dev and production
 const isDev = !app.isPackaged;
@@ -38,13 +38,18 @@ function stringifyEnvFile(settings) {
 	const lines = [];
 	const categories = {
 		auth: ["MEDRUNNER_TOKEN"],
-		sounds: ["CUSTOM_ALERT_SOUND", "CUSTOM_CHATMESSAGE_SOUND", "CUSTOM_TEAMJOIN_SOUND"],
+		sounds: [
+			"CUSTOM_ALERT_SOUND",
+			"CUSTOM_CHATMESSAGE_SOUND",
+			"CUSTOM_TEAMJOIN_SOUND",
+		],
 		features: [
 			"ENABLE_CUSTOM_ALERT_SOUND",
 			"ENABLE_CUSTOM_CHATMESSAGE_SOUND",
 			"ENABLE_CUSTOM_TEAMJOIN_SOUND",
 			"ENABLE_PRINT_SHIPASSIGNMENTS",
 			"ENABLE_PRINT_TEAMJOINORDER",
+			"ENABLE_TEAM_MEMBERS",
 			"ENABLE_ALERT_OVERLAY",
 		],
 		overlay: [
@@ -54,9 +59,8 @@ function stringifyEnvFile(settings) {
 			"OVERLAY_TEXT_SIZE_PERCENT",
 			"OVERLAY_POSITION",
 			"OVERLAY_BORDER_STYLE",
-			"OVERLAY_BACKGROUND_STYLE",
 		],
-		debug: ["DEBUG_MODE", "TEST_MODE"],
+		debug: ["DEBUG_MODE", "TEST_MODE", "API_ENV", "DEV_API_KEY", "LANGUAGE"],
 	};
 	for (const [category, keys] of Object.entries(categories)) {
 		for (const key of keys) {
@@ -81,6 +85,7 @@ function loadSettings() {
 			fs.mkdirSync(soundsPath, { recursive: true });
 		}
 		
+		// Ensure .env exists, otherwise seed it
 		if (!fs.existsSync(envPath)) {
 			// In production, look for .env.example in resources
 			const examplePath = isDev 
@@ -97,7 +102,9 @@ function loadSettings() {
 			}
 		}
 		const content = fs.readFileSync(envPath, "utf-8");
-		return parseEnvFile(content);
+		const parsed = parseEnvFile(content);
+		// Merge with defaults so missing keys (e.g., new duration settings) are populated
+		return { ...getDefaultSettings(), ...parsed };
 	} catch (error) {
 		console.error("Failed to load settings:", error);
 		return getDefaultSettings();
@@ -106,7 +113,9 @@ function loadSettings() {
 
 function saveSettings(settings) {
 	try {
-		const content = stringifyEnvFile(settings);
+		// Merge defaults and existing .env to avoid losing keys that are not present in the UI payload
+		const merged = { ...getDefaultSettings(), ...loadSettings(), ...settings };
+		const content = stringifyEnvFile(merged);
 		fs.writeFileSync(envPath, content, "utf-8");
 		return { success: true };
 	} catch (error) {
@@ -118,6 +127,9 @@ function saveSettings(settings) {
 function getDefaultSettings() {
 	return {
 		MEDRUNNER_TOKEN: "",
+		API_ENV: "prod",
+		DEV_API_KEY: "",
+		LANGUAGE: "en",
 		CUSTOM_ALERT_SOUND: path.join(soundsPath, "alert.wav"),
 		CUSTOM_CHATMESSAGE_SOUND: path.join(soundsPath, "chat.wav"),
 		CUSTOM_TEAMJOIN_SOUND: path.join(soundsPath, "team.wav"),
@@ -126,6 +138,7 @@ function getDefaultSettings() {
 		ENABLE_CUSTOM_TEAMJOIN_SOUND: "true",
 		ENABLE_PRINT_SHIPASSIGNMENTS: "true",
 		ENABLE_PRINT_TEAMJOINORDER: "true",
+		ENABLE_TEAM_MEMBERS: "true",
 		ENABLE_ALERT_OVERLAY: "false",
 		ALERT_OVERLAY_ALL_MONITORS: "false",
 		ALERT_OVERLAY_MONITOR_INDEX: "0",
@@ -133,7 +146,6 @@ function getDefaultSettings() {
 		OVERLAY_TEXT_SIZE_PERCENT: "100",
 		OVERLAY_POSITION: "top",
 		OVERLAY_BORDER_STYLE: "glow",
-		OVERLAY_BACKGROUND_STYLE: "none",
 		TEST_MODE: "false",
 		DEBUG_MODE: "false",
 	};
@@ -169,12 +181,14 @@ function createWindow() {
 	});
 
 	// Create menu
+	const lang = loadSettings().LANGUAGE || 'de';
+	const L = (de, en) => (lang === 'en' ? en : de);
 	const menu = Menu.buildFromTemplate([
 		{
-			label: "Datei",
+			label: L("Datei", "File"),
 			submenu: [
 				{
-					label: "Einstellungen speichern",
+					label: L("Einstellungen speichern", "Save Settings"),
 					accelerator: "CmdOrCtrl+S",
 					click: () => {
 						mainWindow.webContents.send("menu-save");
@@ -182,7 +196,7 @@ function createWindow() {
 				},
 				{ type: "separator" },
 				{
-					label: "Beenden",
+					label: L("Beenden", "Quit"),
 					accelerator: "CmdOrCtrl+Q",
 					click: () => {
 						app.quit();
@@ -191,34 +205,37 @@ function createWindow() {
 			],
 		},
 		{
-			label: "Hilfe",
+			label: L("Hilfe", "Help"),
 			submenu: [
 				{
-					label: "Einstellungsordner öffnen",
+					label: L("Einstellungsordner öffnen", "Open Settings Folder"),
 					click: () => {
 						require("electron").shell.openPath(settingsPath);
 					},
 				},
 				{
-					label: "Sounds-Ordner öffnen",
+					label: L("Sounds-Ordner öffnen", "Open Sounds Folder"),
 					click: () => {
 						require("electron").shell.openPath(soundsPath);
 					},
 				},
 				{ type: "separator" },
 				{
-					label: "Über",
+					label: L("Über", "About"),
 					click: () => {
 						dialog.showMessageBox(mainWindow, {
 							type: "info",
-							title: "Über Medrunner Assistant",
-							message: "Medrunner Assistant v0.3.0",
-							detail: `Entwickelt von GeneralMine & Luebbi3000\n\nGitHub: github.com/GeneralMine/MedrunnerAssistant\n\nEinstellungen: ${settingsPath}\nSounds: ${soundsPath}`,
+							title: L("Über Medrunner Assistant", "About Medrunner Assistant"),
+							message: L("Medrunner Assistant v0.3.0", "Medrunner Assistant v0.3.0"),
+							detail: L(
+								`Entwickelt von GeneralMine & Luebbi3000\n\nGitHub: github.com/GeneralMine/MedrunnerAssistant\n\nEinstellungen: ${settingsPath}\nSounds: ${soundsPath}`,
+								`Developed by GeneralMine & Luebbi3000\n\nGitHub: github.com/GeneralMine/MedrunnerAssistant\n\nSettings: ${settingsPath}\nSounds: ${soundsPath}`
+							),
 						});
 					},
 				},
 				{
-					label: "DevTools",
+					label: L("DevTools", "DevTools"),
 					accelerator: "F12",
 					click: () => {
 						mainWindow.webContents.toggleDevTools();
@@ -310,13 +327,13 @@ function startAssistant() {
 			}
 		});
 
-		// Listen for messages from assistant process (team order updates, etc.)
+		// Listen for messages from assistant process (team members updates, etc.)
 		assistantProcess.on("message", (msg) => {
-			if (msg.type === "team-order") {
-				currentTeamOrder = msg.data || [];
-				console.log("[Assistant] Team order updated:", currentTeamOrder);
+			if (msg.type === "team-members") {
+				currentTeamMembers = msg.data || [];
+				console.log("[Assistant] Team members updated:", currentTeamMembers);
 				if (mainWindow) {
-					mainWindow.webContents.send("team-order-update", currentTeamOrder);
+					mainWindow.webContents.send("team-members-update", currentTeamMembers);
 				}
 			}
 		});
@@ -367,13 +384,13 @@ async function testFeature(featureName, number) {
 	}
 }
 
-// Get team order
-function getTeamOrder() {
+// Get team members
+function getTeamMembers() {
 	if (assistantProcess) {
-		// Request team order from assistant process
-		assistantProcess.send({ type: "get-team-order" });
+		// Request team members from assistant process
+		assistantProcess.send({ type: "get-team-members" });
 	}
-	return currentTeamOrder;
+	return currentTeamMembers;
 }
 
 // IPC Handlers
@@ -384,12 +401,11 @@ ipcMain.handle("load-settings", async () => {
 ipcMain.handle("save-settings", async (event, settings) => {
 	const result = saveSettings(settings);
 
-	// Restart assistant if it's running
-	if (isRunning) {
-		stopAssistant();
-		setTimeout(() => {
-			startAssistant();
-		}, 1000);
+	// Restart assistant if it's running and save succeeded
+	if (result.success && isRunning) {
+		const stopResult = stopAssistant();
+		const restartResult = stopResult.success ? startAssistant() : { success: false, message: stopResult.message };
+		return { ...result, restarted: restartResult };
 	}
 
 	return result;
@@ -437,8 +453,8 @@ ipcMain.handle("test-feature", async (event, featureName, number) => {
 	return testFeature(featureName, number);
 });
 
-ipcMain.handle("get-team-order", async () => {
-	return getTeamOrder();
+ipcMain.handle("get-team-members", async () => {
+	return getTeamMembers();
 });
 
 ipcMain.handle("test-alert-full", async () => {
