@@ -20,20 +20,61 @@ export async function callback(teamUpdate) {
 		// Check if this is the user's active team
 		if (self.data.activeTeam === teamUpdate.id) {
 			console.log("TeamMembers: ✓ This is the active team!");
-			const members = [];
+			let members = [];
 			
 			// Process all members
 			if (teamUpdate.members && Array.isArray(teamUpdate.members)) {
 				console.log(`TeamMembers: Processing ${teamUpdate.members.length} members`);
 				console.log("First member structure:", JSON.stringify(teamUpdate.members[0], null, 2));
 				
-				teamUpdate.members.forEach((member, index) => {
-					members.push({
+				function mapClassToRole(cls) {
+					switch (cls) {
+						case 1: return "Medical";
+						case 2: return "Security";
+						case 3: return "Pilot";
+						case 4: return "Teamlead";
+						case 9: return "Combat Aerospace Patrol";
+						default: return "Member";
+					}
+				}
+
+				function getJoinedAt(member) {
+					// Try common field names; return timestamp (ms) if possible
+					const val = member.joinedAt || member.joined_at || member.joinDate || member.joined || member.createdAt || member.created_at || null;
+					if (!val) return null;
+					try {
+						// If val is numeric or Date-string, convert to ms
+						const d = typeof val === 'number' ? new Date(val) : new Date(String(val));
+						const ms = d.getTime();
+						return Number.isNaN(ms) ? null : ms;
+					} catch (_) {
+						return null;
+					}
+				}
+
+				members = teamUpdate.members.map((member) => {
+					const joinedMs = getJoinedAt(member);
+					return {
 						rsiHandle: member.rsiHandle || "Unknown",
 						discordId: member.discordId || "-",
-						role: member.role || "Member",
-					});
+						role: mapClassToRole(member.class),
+						joinedAt: joinedMs, // milliseconds since epoch or null
+					};
 				});
+
+				// Sort by joinedAt ascending if available; otherwise keep original order
+				const hasJoined = members.some(m => m.joinedAt !== null);
+				if (hasJoined) {
+					members.sort((a, b) => {
+						if (a.joinedAt === null && b.joinedAt === null) return 0;
+						if (a.joinedAt === null) return 1; // nulls last
+						if (b.joinedAt === null) return -1;
+						return a.joinedAt - b.joinedAt;
+					});
+				}
+
+				// Assign order number: 1 = longest-tenured (earliest join)
+				members = members.map((m, idx) => ({ ...m, order: idx + 1 }));
 			} else {
 				console.log("TeamMembers: ✗ No members array found");
 			}

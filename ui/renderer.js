@@ -44,6 +44,8 @@ const translations = {
 		table_rsi: 'RSI Handle',
 		table_discord: 'Discord ID',
 		table_role: 'Rolle',
+		table_joined: 'Beitrittszeit',
+		table_order: 'Reihenfolge',
 		logs_empty: 'Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.',
 		logs_cleared: 'Logs gelöscht',
 		assistant_stopped_code: (code) => `Assistant beendet mit Code ${code}`,
@@ -126,6 +128,8 @@ const translations = {
 		table_rsi: 'RSI Handle',
 		table_discord: 'Discord ID',
 		table_role: 'Role',
+		table_joined: 'Joined',
+		table_order: 'Order',
 		logs_empty: 'No logs available. Start the assistant to see logs.',
 		logs_cleared: 'Logs cleared',
 		assistant_stopped_code: (code) => `Assistant stopped with code ${code}`,
@@ -840,7 +844,7 @@ function displayTeamMembers(members) {
 	const headerRow = document.createElement('tr');
 	headerRow.style.borderBottom = '2px solid var(--border)';
 	
-	const headers = [t('table_rsi'), t('table_discord'), t('table_role')];
+	const headers = [t('table_order'), t('table_rsi'), t('table_discord'), t('table_role'), t('table_joined')];
 	headers.forEach(headerText => {
 		const th = document.createElement('th');
 		th.textContent = headerText;
@@ -861,7 +865,13 @@ function displayTeamMembers(members) {
 			row.style.backgroundColor = 'var(--surface)';
 		}
 		row.style.borderBottom = '1px solid var(--border)';
-		
+
+		const orderCell = document.createElement('td');
+		orderCell.textContent = (member.order != null ? String(member.order) : '-');
+		orderCell.style.padding = '0.75rem';
+		orderCell.style.color = 'var(--text)';
+		orderCell.style.fontWeight = 'bold';
+
 		const rsiHandle = document.createElement('td');
 		rsiHandle.textContent = member.rsiHandle || '-';
 		rsiHandle.style.padding = '0.75rem';
@@ -877,10 +887,26 @@ function displayTeamMembers(members) {
 		role.textContent = member.role || '-';
 		role.style.padding = '0.75rem';
 		role.style.color = 'var(--text)';
+
+		const joined = document.createElement('td');
+		if (member.joinedAt != null) {
+			try {
+				const d = new Date(member.joinedAt);
+				joined.textContent = d.toLocaleString(translations[getLang()].timestampLocale);
+			} catch (_) {
+				joined.textContent = '-';
+			}
+		} else {
+			joined.textContent = '-';
+		}
+		joined.style.padding = '0.75rem';
+		joined.style.color = 'var(--text)';
 		
+		row.appendChild(orderCell);
 		row.appendChild(rsiHandle);
 		row.appendChild(discordId);
 		row.appendChild(role);
+		row.appendChild(joined);
 		tbody.appendChild(row);
 	});
 	table.appendChild(tbody);
