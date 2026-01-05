@@ -983,3 +983,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 		});
 	}
 });
+
+// ============================================================================
+// AUTO INTEGRATION: Ship Assignment & AAR Modules
+// Diese Section lädt automatisch die neuen Module
+// ============================================================================
+
+document.addEventListener('DOMContentLoaded', async () => {
+	// Warte kurz damit die bestehende UI initialisiert ist
+	setTimeout(async () => {
+		try {
+			// Dynamisch importieren statt statisch - vermeidet Fehler wenn Datei fehlt
+			const shipaarInit = await import('./shipaar-init.js').catch(err => {
+				console.warn('Ship Assignment & AAR Modul nicht gefunden:', err.message);
+				return null;
+			});
+			
+			if (shipaarInit) {
+				console.log('✓ Ship Assignment & AAR Module erfolgreich geladen');
+				// Module sind jetzt global verfügbar über window-Objekt
+			}
+		} catch (err) {
+			console.error('Fehler beim Laden der Ship Assignment & AAR Module:', err);
+		}
+	}, 500);
+});
+
+// Global switchTab-Funktion für HTML onclick-Handler
+window.switchTab = function(tabName) {
+	const tabContents = document.querySelectorAll('.tab-content');
+	const tabButtons = document.querySelectorAll('.tab-btn');
+	
+	tabContents.forEach(content => {
+		if (content.getAttribute('data-tab') === tabName) {
+			content.style.display = 'block';
+			content.classList.add('active');
+		} else {
+			content.style.display = 'none';
+			content.classList.remove('active');
+		}
+	});
+	
+	tabButtons.forEach(btn => {
+		if (btn.getAttribute('data-tab') === tabName) {
+			btn.classList.add('active');
+		} else {
+			btn.classList.remove('active');
+		}
+	});
+	
+	// Initialize AAR wenn zu AAR Tab gewechselt wird
+	if (tabName === 'aar' && window.populateAARShipDropdowns) {
+		window.populateAARShipDropdowns();
+	}
+};
