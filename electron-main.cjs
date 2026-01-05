@@ -178,6 +178,7 @@ function createWindow() {
 		},
 		autoHideMenuBar: true,
 		title: "Medrunner Assistant",
+		icon: path.join(__dirname, "assets", "icon-256.png"),
 	});
 
 	// Create menu
@@ -393,6 +394,37 @@ function getTeamMembers() {
 	return currentTeamMembers;
 }
 
+// Store team position and team count
+let currentTeamPosition = 1;
+let currentTeamCount = 1;
+
+// Get current team position
+function getTeamPosition() {
+	return currentTeamPosition;
+}
+
+// Get total team count
+function getTeamCount() {
+	return currentTeamCount;
+}
+
+// Set team position
+function setTeamPosition(position) {
+	currentTeamPosition = position;
+	if (assistantProcess) {
+		assistantProcess.send({ type: "set-team-position", position: position });
+	}
+}
+
+// Update team count when teams change
+function updateTeamCount(count) {
+	currentTeamCount = count;
+	// Reload UI to update team position selector
+	if (mainWindow) {
+		mainWindow.webContents.send("team-count-updated", count);
+	}
+}
+
 // IPC Handlers
 ipcMain.handle("load-settings", async () => {
 	return loadSettings();
@@ -455,6 +487,19 @@ ipcMain.handle("test-feature", async (event, featureName, number) => {
 
 ipcMain.handle("get-team-members", async () => {
 	return getTeamMembers();
+});
+
+ipcMain.handle("get-team-position", async () => {
+	return getTeamPosition();
+});
+
+ipcMain.handle("get-team-count", async () => {
+	return getTeamCount();
+});
+
+ipcMain.handle("set-team-position", async (event, position) => {
+	setTeamPosition(position);
+	return { success: true };
 });
 
 ipcMain.handle("test-alert-full", async () => {

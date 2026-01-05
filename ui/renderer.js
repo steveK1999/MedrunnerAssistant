@@ -1,4 +1,4 @@
-// UI State
+﻿// UI State
 let currentSettings = {};
 let isAssistantRunning = false;
 
@@ -12,17 +12,17 @@ let formElements = {};
 const translations = {
 	de: {
 			// Tooltips
-			tooltip_browse: 'WAV-Datei auswählen',
+			tooltip_browse: 'WAV-Datei ausw�hlen',
 			tooltip_sound_path: 'Pfad zur WAV-Datei',
 			chip_tooltip: 'Klicken zum Kopieren',
-			tooltip_text_size: 'Relative Textgröße für Overlay',
-			tooltip_monitor_select: 'Monitor für Overlay auswählen',
+			tooltip_text_size: 'Relative Textgr��e f�r Overlay',
+			tooltip_monitor_select: 'Monitor f�r Overlay ausw�hlen',
 			tooltip_position_top: 'Zeigt Text oben mit Slider + Puls',
 			tooltip_position_center: 'Zeigt Text mittig mit Einblendung + Puls',
 			tooltip_border_style: 'Randstil des Overlays',
 			tooltip_alert_test: 'Alert-Sound abspielen und Overlay testen',
-		header_title: '🚑 Medrunner Assistant',
-		status_running: 'Läuft',
+		header_title: 'Medrunner Assistant',
+		status_running: 'L�uft',
 		status_stopped: 'Gestoppt',
 		btn_start: 'Start',
 		btn_stop: 'Stop',
@@ -33,28 +33,28 @@ const translations = {
 		tab_settings: 'Einstellungen',
 		tab_console: 'Konsole',
 		sounds_title: 'Sound-Dateien',
-		sounds_desc: 'Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.',
+		sounds_desc: 'W�hle die Sounds f�r verschiedene Events. Die Dateien m�ssen im .wav-Format vorliegen.',
 		alert_sound_label: 'Alert-Sound',
 		chat_sound_label: 'Chat-Nachricht Sound',
 		team_sound_label: 'Team-Beitritt Sound',
 		browse: 'Durchsuchen',
-		available_sounds_title: 'Verfügbare Sounds im sounds/-Ordner:',
+		available_sounds_title: 'Verf�gbare Sounds im sounds/-Ordner:',
 		sounds_none: 'Keine Sounds gefunden',
-		team_no_data: 'Keine Daten verfügbar. Starte den Assistant, um die Team-Mitglieder zu sehen.',
+		team_no_data: 'Keine Daten verf�gbar. Starte den Assistant, um die Team-Mitglieder zu sehen.',
 		table_rsi: 'RSI Handle',
 		table_discord: 'Discord ID',
 		table_role: 'Rolle',
 		table_joined: 'Beitrittszeit',
 		table_order: 'Reihenfolge',
-		logs_empty: 'Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.',
-		logs_cleared: 'Logs gelöscht',
+		logs_empty: 'Keine Logs verf�gbar. Starte den Assistant, um Logs zu sehen.',
+		logs_cleared: 'Logs gel�scht',
 		assistant_stopped_code: (code) => `Assistant beendet mit Code ${code}`,
-		alert_test_running: '⏳ Läuft...',
-		start_failed: (msg) => `❌ Start fehlgeschlagen: ${msg}`,
-		save_token_required: '⚠️ Medrunner Token ist erforderlich!',
-		save_ok: '✅ Einstellungen gespeichert!',
-		save_restart_failed: (msg) => `⚠️ Gespeichert, aber Neustart fehlgeschlagen: ${msg}`,
-		save_error_generic: '❌ Fehler beim Speichern',
+		alert_test_running: '? L�uft...',
+		start_failed: (msg) => `? Start fehlgeschlagen: ${msg}`,
+		save_token_required: '?? Medrunner Token ist erforderlich!',
+		save_ok: '? Einstellungen gespeichert!',
+		save_restart_failed: (msg) => `?? Gespeichert, aber Neustart fehlgeschlagen: ${msg}`,
+		save_error_generic: '? Fehler beim Speichern',
 		timestampLocale: 'de-DE',
 		features_title: 'Features aktivieren/deaktivieren',
 		features_desc: 'Aktiviere oder deaktiviere einzelne Features nach Bedarf.',
@@ -63,17 +63,17 @@ const translations = {
 		feature_chat_title: 'Custom Chat Message Sound',
 		feature_chat_desc: 'Spielt einen Sound bei eingehenden Client-Nachrichten',
 		feature_team_title: 'Custom Team Join Sound',
-		feature_team_desc: 'Benachrichtigt dich, wenn jemand deinem Team beitreten möchte',
+		feature_team_desc: 'Benachrichtigt dich, wenn jemand deinem Team beitreten m�chte',
 		feature_ship_title: 'Print Ship Assignments',
 		feature_ship_desc: 'Zeigt Schiffszuweisungen in der Konsole an',
 		feature_order_title: 'Print Team Join Order',
 		feature_order_desc: 'Zeigt die Reihenfolge der Team-Beitritte an',
 		overlay_title: 'Overlay Einstellungen',
-		overlay_desc: 'Konfiguriere das visuelle Overlay für Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.',
+		overlay_desc: 'Konfiguriere das visuelle Overlay f�r Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.',
 		overlay_enable_title: 'Overlay aktivieren',
 		overlay_enable_desc: 'Zeigt visuelles Feedback bei neuen Alerts',
-		overlay_text_percent_label: 'Textgröße (%) — 100% entspricht Größe 400',
-		overlay_monitor_label: 'Monitor auswählen',
+		overlay_text_percent_label: 'Textgr��e (%) � 100% entspricht Gr��e 400',
+		overlay_monitor_label: 'Monitor ausw�hlen',
 		overlay_position_effect_label: 'Text-Position & Effekt',
 		overlay_radio_top: 'Oben (Slider + Puls)',
 		overlay_radio_center: 'Mitte (Einblendung + Puls)',
@@ -92,7 +92,7 @@ const translations = {
 		overlay_duration_label: 'Dauer (ms)',
 		debug_test_title: 'Debug & Test Optionen',
 		debug_mode_title: 'Debug-Modus',
-		debug_mode_desc: 'Zeigt zusätzliche Debug-Informationen in der Konsole',
+		debug_mode_desc: 'Zeigt zus�tzliche Debug-Informationen in der Konsole',
 		test_mode_title: 'Test Mode',
 		test_mode_desc: 'Wenn aktiviert, werden alle Test-Buttons sichtbar.',
 		api_config_title: 'API Konfiguration (Test Mode)',
@@ -101,11 +101,11 @@ const translations = {
 		api_env_dev: 'Development',
 		dev_api_key_label: 'Dev API Key',
 		alert_test_title: 'Alert Test Full',
-		alert_test_desc: 'Spielt Alert-Sound und zeigt Overlay gemäß Monitor-Auswahl.',
-		alert_test_run_btn: 'Alert-Test ausführen',
+		alert_test_desc: 'Spielt Alert-Sound und zeigt Overlay gem�� Monitor-Auswahl.',
+		alert_test_run_btn: 'Alert-Test ausf�hren',
 	},
 	en: {
-		header_title: '🚑 Medrunner Assistant',
+		header_title: 'Medrunner Assistant',
 		status_running: 'Running',
 		status_stopped: 'Stopped',
 		btn_start: 'Start',
@@ -133,12 +133,12 @@ const translations = {
 		logs_empty: 'No logs available. Start the assistant to see logs.',
 		logs_cleared: 'Logs cleared',
 		assistant_stopped_code: (code) => `Assistant stopped with code ${code}`,
-		alert_test_running: '⏳ Running...',
-		start_failed: (msg) => `❌ Start failed: ${msg}`,
-		save_token_required: '⚠️ Medrunner token is required!',
-		save_ok: '✅ Settings saved!',
-		save_restart_failed: (msg) => `⚠️ Saved, but restart failed: ${msg}`,
-		save_error_generic: '❌ Error while saving',
+		alert_test_running: '? Running...',
+		start_failed: (msg) => `? Start failed: ${msg}`,
+		save_token_required: '?? Medrunner token is required!',
+		save_ok: '? Settings saved!',
+		save_restart_failed: (msg) => `?? Saved, but restart failed: ${msg}`,
+		save_error_generic: '? Error while saving',
 		timestampLocale: 'en-US',
 		features_title: 'Enable/Disable Features',
 		features_desc: 'Toggle individual features as needed.',
@@ -156,7 +156,7 @@ const translations = {
 		overlay_desc: 'Configure the visual overlay for alerts: position, duration, border and background effects.',
 		overlay_enable_title: 'Enable Overlay',
 		overlay_enable_desc: 'Shows visual feedback for new alerts',
-		overlay_text_percent_label: 'Text size (%) — 100% equals size 400',
+		overlay_text_percent_label: 'Text size (%) � 100% equals size 400',
 		overlay_monitor_label: 'Select monitor',
 		overlay_position_effect_label: 'Text Position & Effect',
 		overlay_radio_top: 'Top (Slider + Pulse)',
@@ -187,6 +187,7 @@ const translations = {
 		alert_test_title: 'Alert Test Full',
 		alert_test_desc: 'Plays alert sound and shows overlay according to monitor selection.',
 		alert_test_run_btn: 'Run Alert Test',
+		more_settings_title: 'More Settings',
 		// Tooltips
 		tooltip_browse: 'Select WAV file',
 		tooltip_sound_path: 'Path to WAV file',
@@ -239,10 +240,13 @@ function applyTranslations() {
 		: 'Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.';
 	// Save button
 	const saveBtnEl = document.getElementById('save-btn');
-	if (saveBtnEl) saveBtnEl.textContent = getLang() === 'en' ? '💾 Save Settings' : '💾 Einstellungen speichern';
+	if (saveBtnEl) {
+		const lang = getLang();
+		saveBtnEl.textContent = lang === 'en' ? '💾 Save Settings' : '💾 Einstellungen speichern';
+	}
 	// Clear logs button
 	const clearLogsEl = document.getElementById('clear-logs');
-	if (clearLogsEl) clearLogsEl.textContent = getLang() === 'en' ? 'Clear Logs' : 'Logs löschen';
+	if (clearLogsEl) clearLogsEl.textContent = getLang() === 'en' ? 'Clear Logs' : 'Logs l�schen';
 
 	// Header
 	const headerTitle = document.getElementById('header-title');
@@ -251,8 +255,12 @@ function applyTranslations() {
 	// Sounds tab
 	const soundsTitle = document.getElementById('sounds-title');
 	if (soundsTitle) soundsTitle.textContent = t('sounds_title');
+	const soundsTitleAccordion = document.getElementById('sounds-title-accordion');
+	if (soundsTitleAccordion) soundsTitleAccordion.textContent = t('sounds_title');
 	const soundsDesc = document.getElementById('sounds-desc');
 	if (soundsDesc) soundsDesc.textContent = t('sounds_desc');
+	const soundsDescAccordion = document.getElementById('sounds-desc-accordion');
+	if (soundsDescAccordion) soundsDescAccordion.textContent = t('sounds_desc');
 	const alertLabel = document.getElementById('alert-sound-label');
 	if (alertLabel) alertLabel.textContent = t('alert_sound_label');
 	const chatLabel = document.getElementById('chat-sound-label');
@@ -275,8 +283,12 @@ function applyTranslations() {
 	// Features tab
 	const featuresTitle = document.getElementById('features-title');
 	if (featuresTitle) featuresTitle.textContent = t('features_title');
+	const featuresTitleAccordion = document.getElementById('features-title-accordion');
+	if (featuresTitleAccordion) featuresTitleAccordion.textContent = t('features_title');
 	const featuresDesc = document.getElementById('features-desc');
 	if (featuresDesc) featuresDesc.textContent = t('features_desc');
+	const featuresDescAccordion = document.getElementById('features-desc-accordion');
+	if (featuresDescAccordion) featuresDescAccordion.textContent = t('features_desc');
 	const featAlertTitle = document.getElementById('feature-alert-title');
 	if (featAlertTitle) featAlertTitle.textContent = t('feature_alert_title');
 	const featAlertDesc = document.getElementById('feature-alert-desc');
@@ -301,8 +313,12 @@ function applyTranslations() {
 	// Overlay tab
 	const overlayTitle = document.getElementById('overlay-title');
 	if (overlayTitle) overlayTitle.textContent = t('overlay_title');
+	const overlayTitleAccordion = document.getElementById('overlay-title-accordion');
+	if (overlayTitleAccordion) overlayTitleAccordion.textContent = t('overlay_title');
 	const overlayDesc = document.getElementById('overlay-desc');
 	if (overlayDesc) overlayDesc.textContent = t('overlay_desc');
+	const overlayDescAccordion = document.getElementById('overlay-desc-accordion');
+	if (overlayDescAccordion) overlayDescAccordion.textContent = t('overlay_desc');
 	const overlayEnableTitle = document.getElementById('overlay-enable-title');
 	if (overlayEnableTitle) overlayEnableTitle.textContent = t('overlay_enable_title');
 	const overlayEnableDesc = document.getElementById('overlay-enable-desc');
@@ -386,6 +402,8 @@ function applyTranslations() {
 		alertTestBtn.textContent = t('alert_test_run_btn');
 		alertTestBtn.title = t('tooltip_alert_test');
 	}
+	const moreSettingsTitle = document.getElementById('more-settings-title');
+	if (moreSettingsTitle) moreSettingsTitle.textContent = t('more_settings_title');
 }
 
 // Initialize DOM Elements and setup event listeners
@@ -457,13 +475,13 @@ function initializeDOMElements() {
 				alertTestFullBtn.textContent = t('alert_test_running');
 				const result = await window.api.testAlertFull();
 				if (result.success) {
-					addLog(getLang()==='en'?`✅ Alert Test Full started`:`✅ Alert Test Full gestartet`);
+					addLog(getLang()==='en'?`? Alert Test Full started`:`? Alert Test Full gestartet`);
 				} else {
-					addLog(getLang()==='en'?`❌ Alert Test Full failed: ${result.message}`:`❌ Alert Test Full fehlgeschlagen: ${result.message}`, true);
+					addLog(getLang()==='en'?`? Alert Test Full failed: ${result.message}`:`? Alert Test Full fehlgeschlagen: ${result.message}`, true);
 				}
 				alertTestFullBtn.textContent = originalText;
 			} catch (error) {
-				addLog(getLang()==='en'?`❌ Alert Test Full error: ${error.message}`:`❌ Alert Test Full Fehler: ${error.message}`, true);
+				addLog(getLang()==='en'?`? Alert Test Full error: ${error.message}`:`? Alert Test Full Fehler: ${error.message}`, true);
 			} finally {
 				alertTestFullBtn.disabled = false;
 			}
@@ -498,6 +516,12 @@ function initializeDOMElements() {
 			updateTestButtonsVisibility();
 			updateApiConfigVisibility();
 		});
+	}
+
+	// Initialize header status indicator
+	const header = document.querySelector('header');
+	if (header) {
+		header.classList.add('stopped');
 	}
 }
 
@@ -616,7 +640,7 @@ async function saveSettings() {
 		
 		// Basic validation
 		if (!settings.MEDRUNNER_TOKEN || settings.MEDRUNNER_TOKEN.trim() === '') {
-			showStatus('⚠️ Medrunner Token ist erforderlich!', 'error');
+			showStatus('?? Medrunner Token ist erforderlich!', 'error');
 			return;
 		}
 		
@@ -625,16 +649,16 @@ async function saveSettings() {
 		if (result.success) {
 			currentSettings = settings;
 			if (result.restarted && result.restarted.success === false) {
-				showStatus(`⚠️ Gespeichert, aber Neustart fehlgeschlagen: ${result.restarted.message}`, 'error');
+				showStatus(`?? Gespeichert, aber Neustart fehlgeschlagen: ${result.restarted.message}`, 'error');
 			} else {
-				showStatus('✅ Einstellungen gespeichert!', 'success');
+				showStatus('? Einstellungen gespeichert!', 'success');
 			}
 		} else {
-			showStatus(`❌ Fehler: ${result.error}`, 'error');
+			showStatus(`? Fehler: ${result.error}`, 'error');
 		}
 	} catch (error) {
 		console.error('Failed to save settings:', error);
-		showStatus('❌ Fehler beim Speichern', 'error');
+		showStatus('? Fehler beim Speichern', 'error');
 	}
 }
 
@@ -714,18 +738,19 @@ async function toggleAssistant() {
 			if (result.success) {
 				updateAssistantStatus(true);
 			} else {
-				showStatus(`❌ Start fehlgeschlagen: ${result.message}`, 'error');
+				showStatus(`? Start fehlgeschlagen: ${result.message}`, 'error');
 			}
 		}
 	} catch (error) {
 		console.error('Failed to toggle assistant:', error);
-		showStatus('❌ Fehler beim Starten/Stoppen', 'error');
+		showStatus('? Fehler beim Starten/Stoppen', 'error');
 	}
 }
 
 // Update assistant status UI
 function updateAssistantStatus(running) {
 	isAssistantRunning = running;
+	const header = document.querySelector('header');
 	
 	if (running) {
 		statusIndicator.classList.add('running');
@@ -733,12 +758,20 @@ function updateAssistantStatus(running) {
 		startStopBtn.textContent = t('btn_stop');
 		startStopBtn.classList.remove('btn-primary');
 		startStopBtn.classList.add('btn-secondary');
+		if (header) {
+			header.classList.remove('stopped');
+			header.classList.add('running');
+		}
 	} else {
 		statusIndicator.classList.remove('running');
 		statusText.textContent = t('status_stopped');
 		startStopBtn.textContent = t('btn_start');
 		startStopBtn.classList.remove('btn-secondary');
 		startStopBtn.classList.add('btn-primary');
+		if (header) {
+			header.classList.remove('running');
+			header.classList.add('stopped');
+		}
 	}
 }
 
@@ -773,10 +806,10 @@ function clearLogs() {
 function toggleTokenVisibility() {
 	if (tokenInput.type === 'password') {
 		tokenInput.type = 'text';
-		toggleTokenBtn.textContent = '🙈';
+		toggleTokenBtn.textContent = '??';
 	} else {
 		tokenInput.type = 'password';
-		toggleTokenBtn.textContent = '👁️';
+		toggleTokenBtn.textContent = '???';
 	}
 }
 
@@ -792,19 +825,19 @@ function setupTestButtons() {
 			try {
 				button.disabled = true;
 				const originalText = button.textContent;
-				button.textContent = '⏳ Lädt...';
+				button.textContent = '? L�dt...';
 				
 				const result = await window.api.testFeature(featureName, testNumber);
 				
 				if (result.success) {
-					addLog(`✅ Test ${testNumber} für ${featureName}: ${result.message}`, false);
+					addLog(`? Test ${testNumber} f�r ${featureName}: ${result.message}`, false);
 				} else {
-					addLog(`❌ Test ${testNumber} fehlgeschlagen: ${result.message}`, true);
+					addLog(`? Test ${testNumber} fehlgeschlagen: ${result.message}`, true);
 				}
 				button.textContent = originalText;
 			} catch (error) {
-				addLog(`❌ Test-Fehler: ${error.message}`, true);
-				button.textContent = button.textContent.replace('⏳ Lädt...', `Test ${testNumber}`);
+				addLog(`? Test-Fehler: ${error.message}`, true);
+				button.textContent = button.textContent.replace('? L�dt...', `Test ${testNumber}`);
 			} finally {
 				button.disabled = false;
 			}
@@ -817,9 +850,69 @@ async function loadTeamMembers() {
 	try {
 		const members = await window.api.getTeamMembers();
 		displayTeamMembers(members);
+		await loadTeamPosition();
 	} catch (error) {
 		console.error('Failed to load team members:', error);
 	}
+}
+
+// Load current team position from API
+async function loadTeamPosition() {
+	try {
+		const position = await window.api.getTeamPosition();
+		const teamCount = await window.api.getTeamCount();
+		
+		updateTeamPositionUI(position, teamCount);
+		setupTeamPositionListener();
+	} catch (error) {
+		console.error('Failed to load team position:', error);
+	}
+}
+
+// Update team position UI with selector
+function updateTeamPositionUI(currentPosition, teamCount) {
+	const select = document.getElementById('team-position');
+	const info = document.getElementById('team-count-info');
+	
+	if (!select || !info) return;
+	
+	// Clear existing options
+	select.innerHTML = '';
+	
+	// Add position options
+	for (let i = 1; i <= teamCount; i++) {
+		const option = document.createElement('option');
+		option.value = i;
+		option.textContent = `Position ${i}`;
+		if (i === currentPosition) {
+			option.selected = true;
+		}
+		select.appendChild(option);
+	}
+	
+	// Update team count info
+	const lang = getLang();
+	if (lang === 'en') {
+		info.textContent = `Total teams: ${teamCount}`;
+	} else {
+		info.textContent = `Teams gesamt: ${teamCount}`;
+	}
+}
+
+// Setup listener for team position changes
+function setupTeamPositionListener() {
+	const select = document.getElementById('team-position');
+	if (!select) return;
+	
+	select.addEventListener('change', async (e) => {
+		const newPosition = parseInt(e.target.value);
+		try {
+			await window.api.setTeamPosition(newPosition);
+			console.log(`Team position set to: ${newPosition}`);
+		} catch (error) {
+			console.error('Failed to set team position:', error);
+		}
+	});
 }
 
 // Display team members in UI as table
@@ -986,7 +1079,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ============================================================================
 // AUTO INTEGRATION: Ship Assignment & AAR Modules
-// Diese Section lädt automatisch die neuen Module
+// Diese Section l�dt automatisch die neuen Module
 // ============================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1000,8 +1093,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 			});
 			
 			if (shipaarInit) {
-				console.log('✓ Ship Assignment & AAR Module erfolgreich geladen');
-				// Module sind jetzt global verfügbar über window-Objekt
+				console.log('? Ship Assignment & AAR Module erfolgreich geladen');
+				// Module sind jetzt global verf�gbar �ber window-Objekt
 			}
 		} catch (err) {
 			console.error('Fehler beim Laden der Ship Assignment & AAR Module:', err);
@@ -1009,7 +1102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}, 500);
 });
 
-// Global switchTab-Funktion für HTML onclick-Handler
+// Global switchTab-Funktion f�r HTML onclick-Handler
 window.switchTab = function(tabName) {
 	const tabContents = document.querySelectorAll('.tab-content');
 	const tabButtons = document.querySelectorAll('.tab-btn');
