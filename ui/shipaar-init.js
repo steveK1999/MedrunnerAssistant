@@ -71,12 +71,7 @@ async function initializeShipAndAARModules() {
     }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeShipAndAARModules);
-} else {
-    initializeShipAndAARModules();
-}
+// Don't auto-initialize - let renderer.js handle initialization during DOMContentLoaded
 
 // Tab switching function (if not already defined)
 function switchTab(tabName) {

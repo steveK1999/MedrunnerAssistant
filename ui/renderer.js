@@ -4,9 +4,66 @@ let isAssistantRunning = false;
 
 // DOM Elements - will be populated in DOMContentLoaded
 let tabs, tabContents, saveBtn, saveStatus, startStopBtn, statusIndicator, statusText, statusDot, logOutput, clearLogsBtn, toggleTokenBtn, tokenInput, alertTestFullBtn;
+let positionPill, positionDisplay, copyPositionBtn;
+let teamPositionSelect, teamCountSelect, teamPositionSaveBtn;
 
 // Form Elements
 let formElements = {};
+
+// Manual position state
+let manualPosition = { pos: null, total: null };
+
+// ============================================================================
+// LOAD SHIP ASSIGNMENT AND AAR MODULES
+// ============================================================================
+// This will be called during DOMContentLoaded
+async function loadShipAndAARModules() {
+	try {
+		const shipaarInit = await import('./shipaar-init.js');
+		if (shipaarInit.initializeShipAndAARModules) {
+			await shipaarInit.initializeShipAndAARModules();
+			console.log('[renderer] Ship and AAR modules loaded successfully');
+		}
+	} catch (error) {
+		console.warn('[renderer] Failed to load ship and AAR modules:', error);
+	}
+}
+
+// ============================================================================
+// EARLY DEFINITION: switchTab - needed for HTML onclick handlers
+// ============================================================================
+window.switchTab = function(tabName) {
+	console.log(`[switchTab] Switching to tab: ${tabName}`);
+	
+	const tabContents = document.querySelectorAll('.tab-content');
+	const tabButtons = document.querySelectorAll('.tab-btn');
+	
+	// Hide all tabs
+	tabContents.forEach(content => {
+		content.classList.remove('active');
+		content.style.display = 'none';
+	});
+	
+	// Remove active from all buttons
+	tabButtons.forEach(btn => {
+		btn.classList.remove('active');
+	});
+	
+	// Show selected tab
+	const selectedContent = document.querySelector(`.tab-content[data-tab="${tabName}"]`);
+	if (selectedContent) {
+		selectedContent.classList.add('active');
+		selectedContent.style.display = 'block';
+		console.log(`[switchTab] Showed tab content for: ${tabName}`);
+	}
+	
+	// Activate button
+	const selectedButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+	if (selectedButton) {
+		selectedButton.classList.add('active');
+		console.log(`[switchTab] Activated button for: ${tabName}`);
+	}
+};
 
 // Translations
 const translations = {
@@ -201,6 +258,8 @@ const translations = {
 	}
 };
 
+const POSITION_STORAGE_KEY = 'manual_position_state';
+
 function getLang() {
 	const sel = document.getElementById('language');
 	return sel ? (sel.value || (currentSettings.LANGUAGE || 'de')) : (currentSettings.LANGUAGE || 'de');
@@ -211,6 +270,114 @@ function t(key, ...args) {
 	const value = translations[lang][key];
 	if (typeof value === 'function') return value(...args);
 	return value;
+}
+
+function updatePositionDisplay() {
+	if (!positionDisplay) return;
+	const { pos, total } = manualPosition;
+	if (pos && total) {
+		positionDisplay.textContent = `Pos ${pos}/${total}`;
+	} else {
+		positionDisplay.textContent = 'Pos -/-';
+	}
+}
+
+function loadManualPositionFromStorage() {
+	try {
+		const stored = localStorage.getItem(POSITION_STORAGE_KEY);
+		if (stored) {
+			const parsed = JSON.parse(stored);
+			if (parsed && parsed.pos && parsed.total) {
+				manualPosition = { pos: parseInt(parsed.pos, 10), total: parseInt(parsed.total, 10) };
+			}
+		}
+	} catch (e) {
+		console.warn('Failed to load manual position from storage:', e);
+	}
+	syncTeamPositionControls();
+	updatePositionDisplay();
+}
+
+function saveManualPosition() {
+	try {
+		localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(manualPosition));
+	} catch (e) {
+		console.warn('Failed to save manual position:', e);
+	}
+}
+
+function syncTeamPositionControls() {
+	if (teamPositionSelect) teamPositionSelect.value = manualPosition.pos || '1';
+	if (teamCountSelect) teamCountSelect.value = manualPosition.total || '1';
+}
+
+function promptPositionEntry() {
+	const currentText = manualPosition.pos && manualPosition.total ? `${manualPosition.pos}/${manualPosition.total}` : '';
+	const input = prompt('Position/Teams (z.B. 1/3)', currentText);
+	if (!input) return;
+	const parts = input.split('/');
+	if (parts.length !== 2) return alert('Bitte im Format Position/Teams eingeben, z.B. 1/3');
+	const pos = parseInt(parts[0], 10);
+	const total = parseInt(parts[1], 10);
+	if (!Number.isInteger(pos) || !Number.isInteger(total) || pos < 1 || total < 1) {
+		return alert('Nur positive Zahlen erlaubt (Format 1/3)');
+	}
+	manualPosition = { pos, total };
+	saveManualPosition();
+	updatePositionDisplay();
+}
+
+function copyPositionToClipboard() {
+	const pos = manualPosition.pos;
+	const total = manualPosition.total;
+	let text = 'Position -/-';
+	if (pos && total) {
+		const posEmojis = {
+			1: '<:P1:1432823559364935852>',
+			2: '<:P2:1432823562437638144>',
+			3: '<:P3:1432823565624305756>',
+			4: '<:P4:1432823568389513296>',
+			5: '<:P5:1432823570583189624>',
+		};
+		const sb = [
+			'<:SB1:1182246721129025657>',
+			'<:SB2:1182246723981164665>',
+			'<:SB3:1182246726137036891>',
+			'<:SB4:1182246729844797440>',
+			'<:SB5:1182246731447021589>',
+			'<:SB6:1182246733946818620>',
+			'<:SB7:1182246735616155648>',
+		];
+		const ts = Math.floor(Date.now() / 1000);
+		const posEmoji = posEmojis[pos] || `P${pos}`;
+		text = `${posEmoji}${sb.join('')}<t:${ts}:R>`;
+	}
+
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(() => {
+			console.log('[copyPosition] copied', text);
+		}).catch(() => {
+			fallbackCopy(text);
+		});
+	} else {
+		fallbackCopy(text);
+	}
+}
+
+function fallbackCopy(text) {
+	try {
+		const ta = document.createElement('textarea');
+		ta.value = text;
+		ta.style.position = 'fixed';
+		ta.style.top = '-1000px';
+		document.body.appendChild(ta);
+		ta.focus();
+		ta.select();
+		document.execCommand('copy');
+		document.body.removeChild(ta);
+	} catch (e) {
+		console.warn('Copy failed:', e);
+	}
 }
 
 function applyTranslations() {
@@ -239,10 +406,10 @@ function applyTranslations() {
 		? 'Real-time logs from the running assistant. This tab is visible when Debug Mode is enabled.'
 		: 'Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.';
 	// Save button
-	const saveBtnEl = document.getElementById('save-btn');
+	const saveBtnEl = document.getElementById('save-btn-settings');
 	if (saveBtnEl) {
 		const lang = getLang();
-		saveBtnEl.textContent = lang === 'en' ? '💾 Save Settings' : '💾 Einstellungen speichern';
+		saveBtnEl.textContent = lang === 'en' ? '💾 Speichern' : '💾 Speichern';
 	}
 	// Clear logs button
 	const clearLogsEl = document.getElementById('clear-logs');
@@ -411,16 +578,27 @@ function initializeDOMElements() {
 	// Select DOM Elements
 	tabs = document.querySelectorAll('.tab-btn');
 	tabContents = document.querySelectorAll('.tab-content');
-	saveBtn = document.getElementById('save-btn');
+	saveBtn = document.getElementById('save-btn-settings');
 	saveStatus = document.getElementById('save-status');
 	startStopBtn = document.getElementById('start-stop-btn');
 	statusIndicator = document.getElementById('status-indicator');
 	statusText = document.getElementById('status-text');
 	statusDot = document.getElementById('status-dot');
+	positionPill = document.getElementById('position-pill');
+	positionDisplay = document.getElementById('position-display');
+	copyPositionBtn = document.getElementById('copy-position-btn');
+	teamPositionSelect = document.getElementById('team-position-select');
+	teamCountSelect = document.getElementById('team-count-select');
+	teamPositionSaveBtn = document.getElementById('team-position-save');
 	logOutput = document.getElementById('log-output');
 	clearLogsBtn = document.getElementById('clear-logs');
 	toggleTokenBtn = document.getElementById('toggle-token');
 	tokenInput = document.getElementById('medrunner-token');
+	
+	console.log('[initializeDOMElements] DOM Elements initialized');
+	console.log('[initializeDOMElements] tabs count:', tabs.length);
+	console.log('[initializeDOMElements] startStopBtn:', startStopBtn);
+	console.log('[initializeDOMElements] saveBtn:', saveBtn);
 	
 	// Initialize Form Elements
 	formElements = {
@@ -446,24 +624,54 @@ function initializeDOMElements() {
 		DEV_API_KEY: document.getElementById('dev-api-key'),
 	};
 	
-	// Tab switching
+	// Tab switching with simple event delegation
 	tabs.forEach(tab => {
-		tab.addEventListener('click', () => {
+		tab.addEventListener('click', (e) => {
+			e.preventDefault();
 			const targetTab = tab.dataset.tab;
-			
-			tabs.forEach(t => t.classList.remove('active'));
-			tabContents.forEach(tc => tc.classList.remove('active'));
-			
-			tab.classList.add('active');
-			document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+			console.log('[Tab Click] Switching to:', targetTab);
+			window.switchTab(targetTab);
 		});
 	});
+	console.log('[initializeDOMElements] Tab event listeners attached');
 	
 	// Event Listeners
-	saveBtn.addEventListener('click', saveSettings);
-	startStopBtn.addEventListener('click', toggleAssistant);
-	clearLogsBtn.addEventListener('click', clearLogs);
-	toggleTokenBtn.addEventListener('click', toggleTokenVisibility);
+	if (saveBtn) {
+		saveBtn.addEventListener('click', saveSettings);
+		console.log('[initializeDOMElements] Save button listener attached');
+	}
+	if (startStopBtn) {
+		startStopBtn.addEventListener('click', toggleAssistant);
+		console.log('[initializeDOMElements] Start/Stop button listener attached');
+	}
+	if (clearLogsBtn) {
+		clearLogsBtn.addEventListener('click', clearLogs);
+		console.log('[initializeDOMElements] Clear Logs button listener attached');
+	}
+	if (toggleTokenBtn) {
+		toggleTokenBtn.addEventListener('click', toggleTokenVisibility);
+		console.log('[initializeDOMElements] Toggle Token button listener attached');
+	}
+
+	if (positionDisplay) {
+		positionDisplay.addEventListener('click', promptPositionEntry);
+		console.log('[initializeDOMElements] Position display listener attached');
+	}
+
+	if (copyPositionBtn) {
+		copyPositionBtn.addEventListener('click', copyPositionToClipboard);
+		console.log('[initializeDOMElements] Copy position button listener attached');
+	}
+
+	if (teamPositionSaveBtn) {
+		teamPositionSaveBtn.addEventListener('click', () => {
+			const pos = parseInt(teamPositionSelect?.value, 10) || 1;
+			const total = parseInt(teamCountSelect?.value, 10) || 1;
+			manualPosition = { pos, total };
+			saveManualPosition();
+			updatePositionDisplay();
+		});
+	}
 
 	// Alert Full Test button
 	alertTestFullBtn = document.getElementById('alert-test-full');
@@ -522,6 +730,16 @@ function initializeDOMElements() {
 	const header = document.querySelector('header');
 	if (header) {
 		header.classList.add('stopped');
+
+	if (positionDisplay) {
+		positionDisplay.addEventListener('click', promptPositionEntry);
+		console.log('[initializeDOMElements] Position display listener attached');
+	}
+
+	if (copyPositionBtn) {
+		copyPositionBtn.addEventListener('click', copyPositionToClipboard);
+		console.log('[initializeDOMElements] Copy position button listener attached');
+	}
 	}
 }
 
@@ -753,21 +971,25 @@ function updateAssistantStatus(running) {
 	const header = document.querySelector('header');
 	
 	if (running) {
-		statusIndicator.classList.add('running');
-		statusText.textContent = t('status_running');
-		startStopBtn.textContent = t('btn_stop');
-		startStopBtn.classList.remove('btn-primary');
-		startStopBtn.classList.add('btn-secondary');
+		if (statusIndicator) statusIndicator.classList.add('running');
+		if (statusText) statusText.textContent = t('status_running');
+		if (startStopBtn) {
+			startStopBtn.textContent = t('btn_stop');
+			startStopBtn.classList.remove('btn-primary');
+			startStopBtn.classList.add('btn-secondary');
+		}
 		if (header) {
 			header.classList.remove('stopped');
 			header.classList.add('running');
 		}
 	} else {
-		statusIndicator.classList.remove('running');
-		statusText.textContent = t('status_stopped');
-		startStopBtn.textContent = t('btn_start');
-		startStopBtn.classList.remove('btn-secondary');
-		startStopBtn.classList.add('btn-primary');
+		if (statusIndicator) statusIndicator.classList.remove('running');
+		if (statusText) statusText.textContent = t('status_stopped');
+		if (startStopBtn) {
+			startStopBtn.textContent = t('btn_start');
+			startStopBtn.classList.remove('btn-secondary');
+			startStopBtn.classList.add('btn-primary');
+		}
 		if (header) {
 			header.classList.remove('running');
 			header.classList.add('stopped');
@@ -850,69 +1072,9 @@ async function loadTeamMembers() {
 	try {
 		const members = await window.api.getTeamMembers();
 		displayTeamMembers(members);
-		await loadTeamPosition();
 	} catch (error) {
 		console.error('Failed to load team members:', error);
 	}
-}
-
-// Load current team position from API
-async function loadTeamPosition() {
-	try {
-		const position = await window.api.getTeamPosition();
-		const teamCount = await window.api.getTeamCount();
-		
-		updateTeamPositionUI(position, teamCount);
-		setupTeamPositionListener();
-	} catch (error) {
-		console.error('Failed to load team position:', error);
-	}
-}
-
-// Update team position UI with selector
-function updateTeamPositionUI(currentPosition, teamCount) {
-	const select = document.getElementById('team-position');
-	const info = document.getElementById('team-count-info');
-	
-	if (!select || !info) return;
-	
-	// Clear existing options
-	select.innerHTML = '';
-	
-	// Add position options
-	for (let i = 1; i <= teamCount; i++) {
-		const option = document.createElement('option');
-		option.value = i;
-		option.textContent = `Position ${i}`;
-		if (i === currentPosition) {
-			option.selected = true;
-		}
-		select.appendChild(option);
-	}
-	
-	// Update team count info
-	const lang = getLang();
-	if (lang === 'en') {
-		info.textContent = `Total teams: ${teamCount}`;
-	} else {
-		info.textContent = `Teams gesamt: ${teamCount}`;
-	}
-}
-
-// Setup listener for team position changes
-function setupTeamPositionListener() {
-	const select = document.getElementById('team-position');
-	if (!select) return;
-	
-	select.addEventListener('change', async (e) => {
-		const newPosition = parseInt(e.target.value);
-		try {
-			await window.api.setTeamPosition(newPosition);
-			console.log(`Team position set to: ${newPosition}`);
-		} catch (error) {
-			console.error('Failed to set team position:', error);
-		}
-	});
 }
 
 // Display team members in UI as table
@@ -1065,7 +1227,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await loadAvailableMonitors();
 	await checkInitialStatus();
 	setupTestButtons();
-	loadTeamMembers();
+	await loadTeamMembers();
+	await loadShipAndAARModules(); // Load ship assignment and AAR modules
+	loadManualPositionFromStorage();
 
 	// Re-apply translations when language changes
 	const langSelect = document.getElementById('language');
@@ -1077,56 +1241,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 	}
 });
 
-// ============================================================================
-// AUTO INTEGRATION: Ship Assignment & AAR Modules
-// Diese Section l�dt automatisch die neuen Module
-// ============================================================================
-
-document.addEventListener('DOMContentLoaded', async () => {
-	// Warte kurz damit die bestehende UI initialisiert ist
-	setTimeout(async () => {
-		try {
-			// Dynamisch importieren statt statisch - vermeidet Fehler wenn Datei fehlt
-			const shipaarInit = await import('./shipaar-init.js').catch(err => {
-				console.warn('Ship Assignment & AAR Modul nicht gefunden:', err.message);
-				return null;
-			});
-			
-			if (shipaarInit) {
-				console.log('? Ship Assignment & AAR Module erfolgreich geladen');
-				// Module sind jetzt global verf�gbar �ber window-Objekt
-			}
-		} catch (err) {
-			console.error('Fehler beim Laden der Ship Assignment & AAR Module:', err);
-		}
-	}, 500);
-});
-
-// Global switchTab-Funktion f�r HTML onclick-Handler
-window.switchTab = function(tabName) {
-	const tabContents = document.querySelectorAll('.tab-content');
-	const tabButtons = document.querySelectorAll('.tab-btn');
-	
-	tabContents.forEach(content => {
-		if (content.getAttribute('data-tab') === tabName) {
-			content.style.display = 'block';
-			content.classList.add('active');
-		} else {
-			content.style.display = 'none';
-			content.classList.remove('active');
-		}
-	});
-	
-	tabButtons.forEach(btn => {
-		if (btn.getAttribute('data-tab') === tabName) {
-			btn.classList.add('active');
-		} else {
-			btn.classList.remove('active');
-		}
-	});
-	
-	// Initialize AAR wenn zu AAR Tab gewechselt wird
-	if (tabName === 'aar' && window.populateAARShipDropdowns) {
-		window.populateAARShipDropdowns();
-	}
-};
+// Global functions will be loaded from shipaar-init.js during DOMContentLoaded

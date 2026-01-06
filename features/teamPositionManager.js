@@ -10,6 +10,32 @@ let allTeams = [];
 let lastActiveTeamId = null;
 
 /**
+ * Setup function called when feature is loaded
+ */
+export async function setup() {
+	console.log("[TeamPositionManager] Initializing...");
+	
+	try {
+		// Fetch initial team count and position
+		await fetchAllTeams();
+		await getTeamPositionFromAPI();
+		
+		console.log(`[TeamPositionManager] Initialized - Position: ${currentPosition}/${teamCount}`);
+		
+		// Send initial state to electron main
+		if (process.send) {
+			process.send({
+				type: "team-position-update",
+				position: currentPosition,
+				teamCount: teamCount
+			});
+		}
+	} catch (error) {
+		console.error("[TeamPositionManager] Failed to initialize:", error.message);
+	}
+}
+
+/**
  * Fetch all teams from the API
  * The MedrunnerTeam interface includes: id, status, order, teamName, members[], etc.
  */
@@ -47,6 +73,15 @@ export async function fetchAllTeams() {
 		
 		teamCount = allTeams.length;
 		console.log(`[TeamPositionManager] Fetched ${teamCount} teams from API`);
+		
+		// Send update to electron main process
+		if (process.send) {
+			process.send({
+				type: "team-count-update",
+				count: teamCount
+			});
+		}
+		
 		return teamCount;
 	} catch (error) {
 		console.error("[TeamPositionManager] Failed to fetch teams from API:", error.message);
@@ -80,6 +115,16 @@ export async function getTeamPositionFromAPI() {
 				position = team.order !== undefined ? team.order : 1;
 				currentPosition = position;
 				console.log(`[TeamPositionManager] Current team position: ${position} (of ${teamCount})`);
+				
+				// Send update to electron main process
+				if (process.send) {
+					process.send({
+						type: "team-position-update",
+						position: position,
+						teamCount: teamCount
+					});
+				}
+				
 				return position;
 			}
 		}
@@ -122,6 +167,15 @@ export async function setTeamPosition(newPosition) {
 		
 		currentPosition = validPosition;
 		console.log(`[TeamPositionManager] Position set to ${validPosition} (of ${teamCount})`);
+		
+		// Send update to electron main process
+		if (process.send) {
+			process.send({
+				type: "team-position-update",
+				position: validPosition,
+				teamCount: teamCount
+			});
+		}
 		
 		// TODO: Implement API call to update team order if endpoint is available
 		// This depends on actual API structure for updating team order
@@ -172,6 +226,16 @@ export async function callback(eventData, eventType) {
 			
 			console.log(`[TeamPositionManager] Position rotation: ${currentPosition} → ${newPosition} (of ${teamCount})`);
 			currentPosition = newPosition;
+			
+			// Send update to electron main process
+			if (process.send) {
+				process.send({
+					type: "team-position-update",
+					position: newPosition,
+					teamCount: teamCount
+				});
+			}
+			
 			await setTeamPosition(newPosition);
 		}
 	}

@@ -139,6 +139,7 @@ function getDefaultSettings() {
 		ENABLE_PRINT_SHIPASSIGNMENTS: "true",
 		ENABLE_PRINT_TEAMJOINORDER: "true",
 		ENABLE_TEAM_MEMBERS: "true",
+		ENABLE_TEAM_POSITION_MANAGER: "true",
 		ENABLE_ALERT_OVERLAY: "false",
 		ALERT_OVERLAY_ALL_MONITORS: "false",
 		ALERT_OVERLAY_MONITOR_INDEX: "0",
@@ -335,6 +336,22 @@ function startAssistant() {
 				console.log("[Assistant] Team members updated:", currentTeamMembers);
 				if (mainWindow) {
 					mainWindow.webContents.send("team-members-update", currentTeamMembers);
+				}
+			} else if (msg.type === "team-position-update") {
+				currentTeamPosition = msg.position || 1;
+				currentTeamCount = msg.teamCount || 1;
+				console.log(`[Assistant] Team position updated: ${currentTeamPosition}/${currentTeamCount}`);
+				if (mainWindow) {
+					mainWindow.webContents.send("team-position-changed", {
+						position: currentTeamPosition,
+						teamCount: currentTeamCount
+					});
+				}
+			} else if (msg.type === "team-count-update") {
+				currentTeamCount = msg.count || 1;
+				console.log(`[Assistant] Team count updated: ${currentTeamCount}`);
+				if (mainWindow) {
+					mainWindow.webContents.send("team-count-updated", currentTeamCount);
 				}
 			}
 		});
