@@ -21,6 +21,11 @@ contextBridge.exposeInMainWorld("api", {
 	getTeamMembers: () => ipcRenderer.invoke("get-team-members"),
 	testAlertFull: () => ipcRenderer.invoke("test-alert-full"),
 	
+	// Team position
+	getTeamPosition: () => ipcRenderer.invoke("get-team-position"),
+	getTeamCount: () => ipcRenderer.invoke("get-team-count"),
+	setTeamPosition: (position) => ipcRenderer.invoke("set-team-position", position),
+	
 	// Event listeners
 	onAssistantLog: (callback) => {
 		ipcRenderer.on("assistant-log", (event, message) => callback(message));
@@ -36,5 +41,8 @@ contextBridge.exposeInMainWorld("api", {
 	},
 	onTeamMembersUpdate: (callback) => {
 		ipcRenderer.on("team-members-update", (event, members) => callback(members));
+	},
+	onTeamPositionUpdate: (callback) => {
+		ipcRenderer.on("team-position-changed", (event, data) => callback(data));
 	},
 });

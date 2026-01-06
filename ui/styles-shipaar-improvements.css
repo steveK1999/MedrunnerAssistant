@@ -1,0 +1,151 @@
+/* Ship Assignment Visual Improvements */
+
+/* Enhanced Ship Card Styling */
+.ship-card {
+    background: linear-gradient(135deg, var(--surface-light) 0%, var(--surface) 100%);
+    border: 2px solid var(--primary-light);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ship-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.25);
+    transform: translateY(-2px);
+}
+
+.ship-card h4 {
+    color: var(--primary-light);
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+/* Enhanced Form Controls in Ship Cards */
+.ship-card select {
+    appearance: none;
+    cursor: pointer;
+    font-weight: 500;
+    padding: 0.7rem 2.5rem 0.7rem 0.75rem;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+    background-color: var(--surface);
+}
+
+.ship-card select:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.15);
+}
+
+.ship-card select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background-color: var(--surface-light);
+}
+
+.ship-card input[type="text"],
+.ship-card input[type="number"] {
+    font-weight: 500;
+    font-size: 0.95rem;
+    padding: 0.7rem 0.75rem;
+}
+
+.ship-card input[type="text"]:focus,
+.ship-card input[type="number"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    background-color: var(--surface-light);
+}
+
+/* Enhanced Crew Member Styling */
+.crew-member {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s ease;
+    gap: 0.75rem;
+}
+
+.crew-member:hover {
+    background: var(--surface-light);
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.crew-member input,
+.crew-member select {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.75rem;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background-color: var(--surface-light);
+    border-radius: 6px;
+    min-width: 110px;
+}
+
+.crew-member select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='1.5'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    padding-right: 2rem;
+}
+
+.crew-member input:focus,
+.crew-member select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+    background-color: var(--surface);
+}
+
+/* Action Buttons Styling */
+.ship-card .btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.ship-card .btn-secondary {
+    background: var(--secondary);
+    border: 1px solid transparent;
+}
+
+.ship-card .btn-secondary:hover {
+    background: #0891b2;
+    box-shadow: 0 2px 8px rgba(6, 182, 212, 0.2);
+}
+
+.ship-card .btn-danger {
+    background: #ef4444;
+}
+
+.ship-card .btn-danger:hover {
+    background: #dc2626;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* Section Labels Enhancement */
+.ship-card strong {
+    color: var(--primary-light);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Improved Preview Area */
+#preview {
+    background-color: var(--surface-light) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text) !important;
+    padding: 1.25rem !important;
+    font-family: 'Courier New', monospace !important;
+}

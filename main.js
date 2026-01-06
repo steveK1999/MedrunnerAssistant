@@ -43,9 +43,23 @@ for (const file of files) {
 }
 
 ws.on("TeamDelete", removeTeamFromMap);
+
 // Listen for messages from electron-main.cjs
 process.on("message", async (msg) => {
-	if (msg.type === "test") {
+	if (msg.type === "set-team-position") {
+		// Forward position change to teamPositionManager
+		console.log(`[Main] Setting team position to: ${msg.position}`);
+		const files = fs.readdirSync(path.join(__dirname, "features"));
+		for (const file of files) {
+			if (file.endsWith(".js")) {
+				const module = await import(`./features/${file}`);
+				if (module.name === "Team_Position_Manager" && module.setTeamPosition) {
+					await module.setTeamPosition(msg.position);
+					break;
+				}
+			}
+		}
+	} else if (msg.type === "test") {
 		// Handle test requests
 		console.log(`\n[Test] Running test for: ${msg.feature}`);
 		

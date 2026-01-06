@@ -5,12 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medrunner Assistant - Einstellungen</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles-shipaar.css">
+    <link rel="stylesheet" href="styles-shipaar-improvements.css">
+    <link rel="stylesheet" href="styles-crew-enhancements.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 id="header-title">🚑 Medrunner Assistant</h1>
-            <div class="header-actions">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <img src="logo-small.png" alt="Medrunner Logo" class="header-logo">
+                <h1 id="header-title">Medrunner Assistant</h1>
+            </div>
+            <div class="header-actions" style="gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                <div class="position-pill" id="position-pill" title="Eigene Position und Teamanzahl festlegen">
+                    <span id="position-display">Pos -/-</span>
+                    <button id="copy-position-btn" style="padding: 6px 12px; font-size: 1rem; font-weight: bold; background-color: white; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">SB</button>
+                </div>
+                <button id="copy-alert-btn" title="Alert-Rundlicht kopieren" style="padding: 6px 12px; font-size: 1.2rem; background-color: #1a1a1a; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">🚨</button>
                 <div class="status-indicator" id="status-indicator">
                     <span class="status-dot" id="status-dot"></span>
                     <span id="status-text">Gestoppt</span>
@@ -20,43 +31,42 @@
         </header>
 
         <div class="tabs">
-            <button class="tab-btn active" data-tab="sounds" id="tab-btn-sounds">Sound-Dateien</button>
-            <button class="tab-btn" data-tab="features" id="tab-btn-features">Features</button>
-            <button class="tab-btn" data-tab="overlay" id="tab-btn-overlay">Overlay</button>
-            <button class="tab-btn" data-tab="team" id="tab-btn-team">Team</button>
-            <button class="tab-btn" data-tab="settings" id="tab-btn-settings">Einstellungen</button>
-            <button class="tab-btn" data-tab="console" style="display: none;" id="console-tab-btn">Konsole</button>
+            <button class="tab-btn active" data-tab="team" id="tab-btn-team" onclick="window.switchTab('team'); return false;">Team</button>
+            <button class="tab-btn" data-tab="shipAssignment" id="tab-btn-shipAssignment" onclick="window.switchTab('shipAssignment'); return false;">Ship Assignments</button>
+            <button class="tab-btn" data-tab="aar" id="tab-btn-aar" onclick="window.switchTab('aar'); return false;">After Action Report</button>
+            <button class="tab-btn" data-tab="settings" id="tab-btn-settings" onclick="window.switchTab('settings'); return false;">Einstellungen</button>
+            <button class="tab-btn" data-tab="console" style="display: none;" id="console-tab-btn" onclick="window.switchTab('console'); return false;">Konsole</button>
         </div>
 
         <main>
-            <!-- Sounds Tab -->
-            <div class="tab-content active" data-tab="sounds">
+            <!-- Sounds Tab (hidden - moved to settings) -->
+            <div class="tab-content" data-tab="sounds" style="display: none;">
                 <h2 id="sounds-title">Sound-Dateien</h2>
                 <p class="description" id="sounds-desc">
                     Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.
                 </p>
 
                 <div class="form-group">
-                    <label for="alert-sound" id="alert-sound-label">Alert-Sound</label>
+                    <label for="alert-sound-old" id="alert-sound-label-old">Alert-Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="alert-sound" placeholder="./sounds/alert.wav">
-                        <button type="button" class="btn btn-secondary" data-select="alert-sound" id="browse-alert">Durchsuchen</button>
+                        <input type="text" id="alert-sound-old" placeholder="./sounds/alert.wav">
+                        <button type="button" class="btn btn-secondary" data-select="alert-sound-old" id="browse-alert-old">Durchsuchen</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="chat-sound" id="chat-sound-label">Chat-Nachricht Sound</label>
+                    <label for="chat-sound-old" id="chat-sound-label-old">Chat-Nachricht Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="chat-sound" placeholder="./sounds/chat.wav">
-                        <button type="button" class="btn btn-secondary" data-select="chat-sound" id="browse-chat">Durchsuchen</button>
+                        <input type="text" id="chat-sound-old" placeholder="./sounds/chat.wav">
+                        <button type="button" class="btn btn-secondary" data-select="chat-sound-old" id="browse-chat-old">Durchsuchen</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="team-sound" id="team-sound-label">Team-Beitritt Sound</label>
+                    <label for="team-sound-old" id="team-sound-label-old">Team-Beitritt Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="team-sound" placeholder="./sounds/team.wav">
-                        <button type="button" class="btn btn-secondary" data-select="team-sound" id="browse-team">Durchsuchen</button>
+                        <input type="text" id="team-sound-old" placeholder="./sounds/team.wav">
+                        <button type="button" class="btn btn-secondary" data-select="team-sound-old" id="browse-team-old">Durchsuchen</button>
                     </div>
                 </div>
 
@@ -68,8 +78,8 @@
                 </div>
             </div>
 
-            <!-- Features Tab -->
-            <div class="tab-content" data-tab="features">
+            <!-- Features Tab (hidden - moved to settings) -->
+            <div class="tab-content" data-tab="features" style="display: none;">
                 <h2 id="features-title">Features aktivieren/deaktivieren</h2>
                 <p class="description" id="features-desc">
                     Aktiviere oder deaktiviere einzelne Features nach Bedarf.
@@ -83,7 +93,7 @@
                         </div>
                         <div class="feature-controls">
                             <label class="switch">
-                                <input type="checkbox" id="enable-alert-sound">
+                                <input type="checkbox" id="enable-alert-sound-old">
                                 <span class="slider"></span>
                             </label>
                             <button class="btn btn-test" data-test="alert-sound">Test 1</button>
@@ -147,8 +157,8 @@
                 </div>
             </div>
 
-            <!-- Overlay Tab -->
-            <div class="tab-content" data-tab="overlay">
+            <!-- Overlay Tab (hidden - moved to settings) -->
+            <div class="tab-content" data-tab="overlay" style="display: none;">
                 <h2 id="overlay-title">Overlay Einstellungen</h2>
                 <p class="description" id="overlay-desc">
                     Konfiguriere das visuelle Overlay für Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.
@@ -204,11 +214,39 @@
             </div>
 
             <!-- Team Tab -->
-            <div class="tab-content" data-tab="team">
+            <div class="tab-content active" data-tab="team">
                 <h2 id="team-title">Team Mitglieder</h2>
                 <p class="description" id="team-desc">
                     Zeigt alle Mitglieder des aktuellen Teams mit Discord ID, RSI Handle und Rolle.
                 </p>
+
+                <div class="settings-section" style="margin-bottom: 1.5rem;">
+                    <div class="form-group">
+                        <label for="team-position-select">Current Position of the Team</label>
+                        <select id="team-position-select" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="team-count-select">Number of Teams of your System</label>
+                        <select id="team-count-select" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end;">
+                        <button class="btn btn-success" id="team-position-save" style="min-width: 140px;">SAVE</button>
+                    </div>
+                </div>
 
                 <div class="team-members" id="team-members">
                     <p class="muted">Keine Daten verfügbar. Starte den Assistant, um die Team-Mitglieder zu sehen.</p>
@@ -217,96 +255,299 @@
 
             <!-- Settings Tab -->
             <div class="tab-content" data-tab="settings">
-                <h2 id="settings-title">Einstellungen</h2>
-
-                <div class="form-group">
-                    <label for="language" id="language-label">Sprache / Language</label>
-                    <select id="language" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-                        <option value="de">Deutsch</option>
-                        <option value="en">English</option>
-                    </select>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 id="settings-title" style="margin: 0;">Einstellungen</h2>
+                    <button class="btn btn-success" id="save-btn-settings">💾 Speichern</button>
                 </div>
 
-                <div class="form-group">
-                    <label for="medrunner-token" id="medrunner-token-label">Medrunner API Token *</label>
-                    <p class="description" id="medrunner-token-desc" style="margin-top: -0.5rem; margin-bottom: 0.5rem; font-size: 0.9em;">
-                        Hol dir deinen Token im Staff Portal unter deinem Medrunner-Profil.
-                    </p>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="password" id="medrunner-token" placeholder="MRA.3/..." required>
-                        <button type="button" class="btn-icon" id="toggle-token" title="Token anzeigen/verbergen">
-                            👁️
-                        </button>
+                <!-- Language & Token Settings (Top Section) -->
+                <div class="settings-section">
+                    <div class="form-group">
+                        <label for="language" id="language-label">Sprache / Language</label>
+                        <select id="language" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            <option value="de">Deutsch</option>
+                            <option value="en">English</option>
+                        </select>
                     </div>
-                </div>
 
-                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
-
-                <h3 id="overlay-duration-title">Overlay-Dauer (Millisekunden)</h3>
-                <p class="description" id="overlay-duration-desc">
-                    Bestimme, wie lange das Alert-Overlay angezeigt wird.
-                </p>
-                <div class="form-group">
-                    <label for="overlay-duration" id="overlay-duration-label">Dauer (ms)</label>
-                    <input type="number" id="overlay-duration" min="500" step="100" value="3000" placeholder="3000" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-                </div>
-
-                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
-
-                <h3 id="debug-test-title">Debug & Test Optionen</h3>
-
-                <div class="feature-item">
-                    <div class="feature-info">
-                        <h3 id="debug-mode-title">Debug-Modus</h3>
-                        <p id="debug-mode-desc">Zeigt zusätzliche Debug-Informationen in der Konsole</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="debug-mode">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div class="feature-item">
-                    <div class="feature-info">
-                        <h3 id="test-mode-title">Test Mode</h3>
-                        <p id="test-mode-desc">Wenn aktiviert, werden alle Test-Buttons sichtbar.</p>
-                    </div>
-                    <label class="switch">
-                        <input type="checkbox" id="test-mode">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-
-                <div id="api-config-section" style="display: none; margin-top: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
-                    <h3 id="api-config-title">API Konfiguration (Test Mode)</h3>
-                    <div class="form-group" style="margin-bottom: 1rem;">
-                        <label id="api-env-label">API Umgebung</label>
-                        <div style="display: flex; gap: 1rem;">
-                            <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="radio" name="api-env" value="prod" checked>
-                                <span id="api-env-prod">Production (Standard)</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                <input type="radio" name="api-env" value="dev">
-                                <span id="api-env-dev">Development</span>
-                            </label>
+                    <div class="form-group">
+                        <label for="medrunner-token" id="medrunner-token-label">Medrunner API Token *</label>
+                        <p class="description" id="medrunner-token-desc" style="margin-top: -0.5rem; margin-bottom: 0.5rem; font-size: 0.9em;">
+                            Hol dir deinen Token im Staff Portal unter deinem Medrunner-Profil.
+                        </p>
+                        <div style="display: flex; gap: 0.5rem;">
+                            <input type="password" id="medrunner-token" placeholder="MRA.3/..." required>
+                            <button type="button" class="btn-icon" id="toggle-token" title="Token anzeigen/verbergen">
+                                👁️
+                            </button>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="dev-api-key" id="dev-api-key-label">Dev API Key</label>
-                        <input type="password" id="dev-api-key" placeholder="API Key für Dev Umgebung" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
-                    </div>
                 </div>
 
-                <div class="feature-item">
-                    <div class="feature-info">
-                        <h3 id="alert-test-title">Alert Test Full</h3>
-                        <p id="alert-test-desc">Spielt Alert-Sound und zeigt Overlay gemäß Monitor-Auswahl.</p>
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <!-- More Settings Section Header -->
+                <h3 id="more-settings-title" style="margin: 1.5rem 0 1rem 0; padding: 0; font-size: 1.1em; color: var(--text);">Erweiterte Einstellungen</h3>
+
+                <!-- Sound-Dateien Accordion -->
+                <details class="accordion">
+                    <summary class="accordion-header">
+                        <h3 id="sounds-title-accordion">Sound-Dateien</h3>
+                        <span class="accordion-icon">▼</span>
+                    </summary>
+                    <div class="accordion-content">
+                        <p class="description" id="sounds-desc-accordion">
+                            Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.
+                        </p>
+
+                        <div class="form-group">
+                            <label for="alert-sound" id="alert-sound-label">Alert-Sound</label>
+                            <div class="file-input-group">
+                                <input type="text" id="alert-sound" placeholder="./sounds/alert.wav">
+                                <button type="button" class="btn btn-secondary" data-select="alert-sound" id="browse-alert">Durchsuchen</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="chat-sound" id="chat-sound-label">Chat-Nachricht Sound</label>
+                            <div class="file-input-group">
+                                <input type="text" id="chat-sound" placeholder="./sounds/chat.wav">
+                                <button type="button" class="btn btn-secondary" data-select="chat-sound" id="browse-chat">Durchsuchen</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="team-sound" id="team-sound-label">Team-Beitritt Sound</label>
+                            <div class="file-input-group">
+                                <input type="text" id="team-sound" placeholder="./sounds/team.wav">
+                                <button type="button" class="btn btn-secondary" data-select="team-sound" id="browse-team">Durchsuchen</button>
+                            </div>
+                        </div>
+
+                        <div class="available-sounds" id="available-sounds">
+                            <h3 id="available-sounds-title">Verfügbare Sounds im sounds/-Ordner:</h3>
+                            <div class="sound-list" id="sound-list">
+                                <p class="muted" id="sounds-empty-msg">Keine Sounds gefunden</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="feature-controls">
-                        <button type="button" class="btn btn-primary" id="alert-test-full">Alert-Test ausführen</button>
+                </details>
+
+                <!-- Features Accordion -->
+                <details class="accordion">
+                    <summary class="accordion-header">
+                        <h3 id="features-title-accordion">Features aktivieren/deaktivieren</h3>
+                        <span class="accordion-icon">▼</span>
+                    </summary>
+                    <div class="accordion-content">
+                        <p class="description" id="features-desc-accordion">
+                            Aktiviere oder deaktiviere einzelne Features nach Bedarf.
+                        </p>
+
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-alert-title">Custom Alert Sound</h3>
+                                    <p id="feature-alert-desc">Spielt einen benutzerdefinierten Sound bei neuen Alerts ab</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-alert-sound">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <button class="btn btn-test" data-test="alert-sound">Test 1</button>
+                                </div>
+                            </div>
+
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-chat-title">Custom Chat Message Sound</h3>
+                                    <p id="feature-chat-desc">Spielt einen Sound bei eingehenden Client-Nachrichten</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-chat-sound">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <button class="btn btn-test" data-test="chat-message-sound">Test 2</button>
+                                </div>
+                            </div>
+
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-team-title">Custom Team Join Sound</h3>
+                                    <p id="feature-team-desc">Benachrichtigt dich, wenn jemand deinem Team beitreten möchte</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-team-sound">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <button class="btn btn-test" data-test="team-join-sound">Test 3</button>
+                                </div>
+                            </div>
+
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-ship-title">Print Ship Assignments</h3>
+                                    <p id="feature-ship-desc">Zeigt Schiffszuweisungen in der Konsole an</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-ship-assignments">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-order-title">Print Team Join Order</h3>
+                                    <p id="feature-order-desc">Zeigt die Reihenfolge der Team-Beitritte an</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-team-order">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <button class="btn btn-test" data-test="team-order">Test 4</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </details>
+
+                <!-- Overlay Accordion -->
+                <details class="accordion">
+                    <summary class="accordion-header">
+                        <h3 id="overlay-title-accordion">Overlay Einstellungen</h3>
+                        <span class="accordion-icon">▼</span>
+                    </summary>
+                    <div class="accordion-content">
+                        <p class="description" id="overlay-desc-accordion">
+                            Konfiguriere das visuelle Overlay für Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.
+                        </p>
+
+                        <div class="feature-item">
+                            <div class="feature-info">
+                                <h3 id="overlay-enable-title">Overlay aktivieren</h3>
+                                <p id="overlay-enable-desc">Zeigt visuelles Feedback bei neuen Alerts</p>
+                            </div>
+                            <div class="feature-controls">
+                                <label class="switch">
+                                    <input type="checkbox" id="enable-overlay">
+                                    <span class="slider"></span>
+                                </label>
+                                <button class="btn btn-test" data-test="alert-overlay">Test 5</button>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="overlay-duration" id="overlay-duration-label">Overlay-Dauer (ms)</label>
+                            <input type="number" id="overlay-duration" min="500" step="100" value="3000" placeholder="3000" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="overlay-text-percent" id="overlay-text-percent-label">Textgröße (%) — 100% entspricht Größe 400</label>
+                            <input type="number" id="overlay-text-percent" min="10" max="500" step="5" value="100" placeholder="100" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                        </div>
+
+                        <div class="form-group" style="margin-top: 1rem;">
+                            <label for="overlay-monitor" id="overlay-monitor-label">Monitor auswählen</label>
+                            <select id="overlay-monitor" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                                <option value="0">Lädt...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 2rem;">
+                            <label id="overlay-position-effect-label">Text-Position & Effekt</label>
+                            <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem;">
+                                <label style="display: flex; align-items: center; gap: 0.5rem;" id="overlay-radio-top-label">
+                                    <input type="radio" name="overlay-position" value="top" checked>
+                                    <span id="overlay-radio-top">Oben (Slider + Puls)</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;" id="overlay-radio-center-label">
+                                    <input type="radio" name="overlay-position" value="center">
+                                    <span id="overlay-radio-center">Mitte (Einblendung + Puls)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="overlay-border-style" id="overlay-border-style-label">Randstil</label>
+                            <select id="overlay-border-style" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                                <option value="none">Keiner</option>
+                                <option value="glow">Rot leuchtender Rand</option>
+                            </select>
+                        </div>
+                    </div>
+                </details>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+                <!-- Debug & Test Options Accordion -->
+                <details class="accordion">
+                    <summary class="accordion-header">
+                        <h3 id="debug-test-title">Debug & Test Optionen</h3>
+                        <span class="accordion-icon">▼</span>
+                    </summary>
+                    <div class="accordion-content">
+                        <div class="feature-item">
+                            <div class="feature-info">
+                                <h3 id="debug-mode-title">Debug-Modus</h3>
+                                <p id="debug-mode-desc">Zeigt zusätzliche Debug-Informationen in der Konsole</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="debug-mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-info">
+                                <h3 id="test-mode-title">Test Mode</h3>
+                                <p id="test-mode-desc">Wenn aktiviert, werden alle Test-Buttons sichtbar.</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="test-mode">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div id="api-config-section" style="display: none; margin-top: 1.5rem; padding: 1rem; background: var(--surface); border-radius: 4px; border: 1px solid var(--border);">
+                            <h3 id="api-config-title">API Konfiguration (Test Mode)</h3>
+                            <div class="form-group" style="margin-bottom: 1rem;">
+                                <label id="api-env-label">API Umgebung</label>
+                                <div style="display: flex; gap: 1rem;">
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="radio" name="api-env" value="prod" checked>
+                                        <span id="api-env-prod">Production (Standard)</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <input type="radio" name="api-env" value="dev">
+                                        <span id="api-env-dev">Development</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="dev-api-key" id="dev-api-key-label">Dev API Key</label>
+                                <input type="password" id="dev-api-key" placeholder="API Key für Dev Umgebung" style="width: 100%; padding: 0.5rem; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); color: var(--text);">
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
+                            <div class="feature-info">
+                                <h3 id="alert-test-title">Alert Test Full</h3>
+                                <p id="alert-test-desc">Spielt Alert-Sound und zeigt Overlay gemäß Monitor-Auswahl.</p>
+                            </div>
+                            <div class="feature-controls">
+                                <button type="button" class="btn btn-primary" id="alert-test-full">Alert-Test ausführen</button>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
             </div>
 
             <!-- Console Tab -->
@@ -320,10 +561,252 @@
                 </div>
                 <button type="button" class="btn btn-secondary" id="clear-logs">Logs löschen</button>
             </div>
+
+            <!-- Ship Assignment Tab -->
+            <div class="tab-content" data-tab="shipAssignment">
+                <h2>Ship Assignments</h2>
+                <p class="description">Manage ship assignments and crew members for missions.</p>
+
+                <!-- Import Success Banner -->
+                <div id="import-success-banner" class="hidden" style="display: none;">
+                    <div class="alert alert-success" style="margin-bottom: 1rem;">
+                        <span id="import-success-message">Successfully imported!</span>
+                    </div>
+                </div>
+
+                <!-- Ship Groups Card -->
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem;">Ship Groups</h3>
+                    
+                    <div class="form-group" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <input type="text" id="api-status" placeholder="Loading ships..." readonly style="flex: 1; min-width: 150px;">
+                        <button class="btn btn-secondary" onclick="loadShips()">Refresh Ships</button>
+                        <button class="btn btn-secondary" onclick="openImportModal()">Import from Discord</button>
+                        <button class="btn btn-danger" onclick="confirmClearShipAssignments()">Clear All</button>
+                    </div>
+
+                    <div id="ships-container" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+                    <button class="btn btn-primary" onclick="addShip()" style="margin-top: 1rem; width: 100%;">Add Ship</button>
+                </div>
+
+                <!-- Preview Card -->
+                <div class="card">
+                    <h3 style="margin-bottom: 1rem;">Preview</h3>
+                    <div id="preview" style="background-color: #1a1a1a; color: #888; padding: 1rem; border-radius: 0.5rem; min-height: 100px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; margin-bottom: 1rem; border: 1px solid #333;">
+                        Add ships and crew members to see preview...
+                    </div>
+                    
+                    <div id="successMessage" class="hidden" style="display: none;">
+                        <div class="alert alert-success">✅ Copied to clipboard!</div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="copyToClipboard()" style="width: 100%;">COPY TO CLIPBOARD</button>
+                </div>
+            </div>
+
+            <!-- After Action Report Tab -->
+            <div class="tab-content" data-tab="aar">
+                <h2>After Action Report</h2>
+                <p class="description">Generate structured mission reports with ship assignments and location data.</p>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 1.5rem;">After Action Report</h3>
+
+                    <form id="aar-form">
+                        <!-- Ships Used Section -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: #4dabf7;">Ships Used</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Gunship</label>
+                                    <select id="aar-gunship" class="form-control">
+                                        <option value="">Select ship...</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Medical Ship</label>
+                                    <select id="aar-medical" class="form-control">
+                                        <option value="">Select ship...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">CAP Ships</label>
+                                <div id="aar-cap-container" style="margin-bottom: 0.5rem;">
+                                    <span id="aar-cap-empty" style="color: #888; font-size: 0.9rem; display: block; padding: 0.5rem;">No CAP ships assigned</span>
+                                </div>
+                                <button type="button" class="btn btn-secondary" onclick="addCAPShipDropdown()" style="width: 100%;">Add CAP Ship</button>
+                            </div>
+
+                            <div style="margin-top: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Additional Ships</label>
+                                <input type="text" id="aar-additional-ships" placeholder="List additional ships..." class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Mission Location Section -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: #4dabf7;">Mission Location</h4>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Planet/Location</label>
+                                    <select id="aar-planet" class="form-control">
+                                        <option value="">Select location...</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Point of Interest</label>
+                                    <select id="aar-poi" class="form-control">
+                                        <option value="">Select POI...</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Extraction Point</label>
+                                <input type="text" id="aar-extraction" placeholder="Extraction location..." class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Mission Details Section -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: #4dabf7;">Mission Details</h4>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Reason</label>
+                                <input type="text" id="aar-reason" placeholder="Reason for mission..." class="form-control">
+                            </div>
+
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Outcome</label>
+                                <select id="aar-outcome" class="form-control">
+                                    <option value="">Select outcome...</option>
+                                    <option value="Success">Success</option>
+                                    <option value="Partial Success">Partial Success</option>
+                                    <option value="Failed">Failed</option>
+                                    <option value="Aborted">Aborted</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 1rem;">
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Casualties</label>
+                                <input type="text" id="aar-casualties" placeholder="Report casualties..." class="form-control">
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">Additional Notes</label>
+                                <textarea id="aar-notes" placeholder="Any additional notes..." class="form-control" rows="4" style="resize: vertical;"></textarea>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div style="margin-bottom: 1rem;">
+                        <h4 style="margin-bottom: 0.5rem;">Preview</h4>
+                        <div id="aar-preview" style="background-color: #1a1a1a; color: #888; padding: 1rem; border-radius: 0.5rem; min-height: 150px; max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; white-space: pre-wrap; word-wrap: break-word; border: 1px solid #333;">
+                            Fill in AAR details to see preview...
+                        </div>
+                    </div>
+
+                    <div id="aar-successMessage" class="hidden" style="display: none;">
+                        <div class="alert alert-success" style="margin-bottom: 1rem;">✅ Copied to clipboard!</div>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="copyAARToClipboard()" style="flex: 1; min-width: 150px;">Copy to Clipboard</button>
+                        <button class="btn btn-secondary" onclick="clearAARForm()" style="flex: 1; min-width: 150px;">Clear Form</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Modal -->
+            <div id="import-modal" class="modal" style="display: none;">
+                <div class="modal-content" style="max-width: 600px;">
+                    <h3>Import from Discord</h3>
+                    <p style="margin-bottom: 1rem; color: #999;">
+                        Paste a Discord ship assignment message to import all ships and crew members.
+                    </p>
+
+                    <textarea id="import-discord-message" placeholder="Paste Discord message here..." class="form-control" rows="10" style="margin-bottom: 1rem; resize: vertical;"></textarea>
+
+                    <div id="import-status" class="hidden" style="display: none; margin-bottom: 1rem;"></div>
+
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button class="btn btn-primary" onclick="importFromDiscord()" style="flex: 1;">Import</button>
+                        <button class="btn btn-secondary" onclick="closeImportModal()" style="flex: 1;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <datalist id="crew-name-suggestions"></datalist>
+            <datalist id="crew-discord-suggestions"></datalist>
+
+            <style>
+                .form-control {
+                    width: 100%;
+                    padding: 0.5rem;
+                    border: 1px solid #444;
+                    border-radius: 0.375rem;
+                    background-color: #1a1a1a;
+                    color: #fff;
+                    font-size: 0.875rem;
+                }
+
+                .form-control:focus {
+                    outline: none;
+                    border-color: #4dabf7;
+                    box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.1);
+                }
+
+                .card {
+                    background-color: #2a2a2a;
+                    padding: 1.5rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid #444;
+                    margin-bottom: 1rem;
+                }
+
+                .alert {
+                    padding: 0.75rem 1rem;
+                    border-radius: 0.375rem;
+                    margin-bottom: 1rem;
+                }
+
+                .alert-success {
+                    background-color: #1a5f1a;
+                    color: #4ade80;
+                    border: 1px solid #166b16;
+                }
+
+                .hidden {
+                    display: none !important;
+                }
+
+                .modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+
+                .modal-content {
+                    background-color: #2a2a2a;
+                    padding: 1.5rem;
+                    border-radius: 0.5rem;
+                    border: 1px solid #444;
+                }
+            </style>
         </main>
 
         <footer>
-            <button class="btn btn-success" id="save-btn">💾 Einstellungen speichern</button>
             <div class="save-status" id="save-status"></div>
         </footer>
     </div>

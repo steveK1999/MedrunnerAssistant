@@ -139,6 +139,7 @@ function getDefaultSettings() {
 		ENABLE_PRINT_SHIPASSIGNMENTS: "true",
 		ENABLE_PRINT_TEAMJOINORDER: "true",
 		ENABLE_TEAM_MEMBERS: "true",
+		ENABLE_TEAM_POSITION_MANAGER: "true",
 		ENABLE_ALERT_OVERLAY: "false",
 		ALERT_OVERLAY_ALL_MONITORS: "false",
 		ALERT_OVERLAY_MONITOR_INDEX: "0",
@@ -178,6 +179,7 @@ function createWindow() {
 		},
 		autoHideMenuBar: true,
 		title: "Medrunner Assistant",
+		icon: path.join(__dirname, "assets", "icon-256.png"),
 	});
 
 	// Create menu
@@ -335,6 +337,22 @@ function startAssistant() {
 				if (mainWindow) {
 					mainWindow.webContents.send("team-members-update", currentTeamMembers);
 				}
+			} else if (msg.type === "team-position-update") {
+				currentTeamPosition = msg.position || 1;
+				currentTeamCount = msg.teamCount || 1;
+				console.log(`[Assistant] Team position updated: ${currentTeamPosition}/${currentTeamCount}`);
+				if (mainWindow) {
+					mainWindow.webContents.send("team-position-changed", {
+						position: currentTeamPosition,
+						teamCount: currentTeamCount
+					});
+				}
+			} else if (msg.type === "team-count-update") {
+				currentTeamCount = msg.count || 1;
+				console.log(`[Assistant] Team count updated: ${currentTeamCount}`);
+				if (mainWindow) {
+					mainWindow.webContents.send("team-count-updated", currentTeamCount);
+				}
 			}
 		});
 
@@ -391,6 +409,37 @@ function getTeamMembers() {
 		assistantProcess.send({ type: "get-team-members" });
 	}
 	return currentTeamMembers;
+}
+
+// Store team position and team count
+let currentTeamPosition = 1;
+let currentTeamCount = 1;
+
+// Get current team position
+function getTeamPosition() {
+	return currentTeamPosition;
+}
+
+// Get total team count
+function getTeamCount() {
+	return currentTeamCount;
+}
+
+// Set team position
+function setTeamPosition(position) {
+	currentTeamPosition = position;
+	if (assistantProcess) {
+		assistantProcess.send({ type: "set-team-position", position: position });
+	}
+}
+
+// Update team count when teams change
+function updateTeamCount(count) {
+	currentTeamCount = count;
+	// Reload UI to update team position selector
+	if (mainWindow) {
+		mainWindow.webContents.send("team-count-updated", count);
+	}
 }
 
 // IPC Handlers
@@ -455,6 +504,19 @@ ipcMain.handle("test-feature", async (event, featureName, number) => {
 
 ipcMain.handle("get-team-members", async () => {
 	return getTeamMembers();
+});
+
+ipcMain.handle("get-team-position", async () => {
+	return getTeamPosition();
+});
+
+ipcMain.handle("get-team-count", async () => {
+	return getTeamCount();
+});
+
+ipcMain.handle("set-team-position", async (event, position) => {
+	setTeamPosition(position);
+	return { success: true };
 });
 
 ipcMain.handle("test-alert-full", async () => {

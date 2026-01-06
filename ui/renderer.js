@@ -1,28 +1,85 @@
-// UI State
+﻿// UI State
 let currentSettings = {};
 let isAssistantRunning = false;
 
 // DOM Elements - will be populated in DOMContentLoaded
 let tabs, tabContents, saveBtn, saveStatus, startStopBtn, statusIndicator, statusText, statusDot, logOutput, clearLogsBtn, toggleTokenBtn, tokenInput, alertTestFullBtn;
+let positionPill, positionDisplay, copyPositionBtn;
+let teamPositionSelect, teamCountSelect, teamPositionSaveBtn;
 
 // Form Elements
 let formElements = {};
+
+// Manual position state
+let manualPosition = { pos: null, total: null };
+
+// ============================================================================
+// LOAD SHIP ASSIGNMENT AND AAR MODULES
+// ============================================================================
+// This will be called during DOMContentLoaded
+async function loadShipAndAARModules() {
+	try {
+		const shipaarInit = await import('./shipaar-init.js');
+		if (shipaarInit.initializeShipAndAARModules) {
+			await shipaarInit.initializeShipAndAARModules();
+			console.log('[renderer] Ship and AAR modules loaded successfully');
+		}
+	} catch (error) {
+		console.warn('[renderer] Failed to load ship and AAR modules:', error);
+	}
+}
+
+// ============================================================================
+// EARLY DEFINITION: switchTab - needed for HTML onclick handlers
+// ============================================================================
+window.switchTab = function(tabName) {
+	console.log(`[switchTab] Switching to tab: ${tabName}`);
+	
+	const tabContents = document.querySelectorAll('.tab-content');
+	const tabButtons = document.querySelectorAll('.tab-btn');
+	
+	// Hide all tabs
+	tabContents.forEach(content => {
+		content.classList.remove('active');
+		content.style.display = 'none';
+	});
+	
+	// Remove active from all buttons
+	tabButtons.forEach(btn => {
+		btn.classList.remove('active');
+	});
+	
+	// Show selected tab
+	const selectedContent = document.querySelector(`.tab-content[data-tab="${tabName}"]`);
+	if (selectedContent) {
+		selectedContent.classList.add('active');
+		selectedContent.style.display = 'block';
+		console.log(`[switchTab] Showed tab content for: ${tabName}`);
+	}
+	
+	// Activate button
+	const selectedButton = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+	if (selectedButton) {
+		selectedButton.classList.add('active');
+		console.log(`[switchTab] Activated button for: ${tabName}`);
+	}
+};
 
 // Translations
 const translations = {
 	de: {
 			// Tooltips
-			tooltip_browse: 'WAV-Datei auswählen',
+			tooltip_browse: 'WAV-Datei ausw�hlen',
 			tooltip_sound_path: 'Pfad zur WAV-Datei',
 			chip_tooltip: 'Klicken zum Kopieren',
-			tooltip_text_size: 'Relative Textgröße für Overlay',
-			tooltip_monitor_select: 'Monitor für Overlay auswählen',
+			tooltip_text_size: 'Relative Textgr��e f�r Overlay',
+			tooltip_monitor_select: 'Monitor f�r Overlay ausw�hlen',
 			tooltip_position_top: 'Zeigt Text oben mit Slider + Puls',
 			tooltip_position_center: 'Zeigt Text mittig mit Einblendung + Puls',
 			tooltip_border_style: 'Randstil des Overlays',
 			tooltip_alert_test: 'Alert-Sound abspielen und Overlay testen',
-		header_title: '🚑 Medrunner Assistant',
-		status_running: 'Läuft',
+		header_title: 'Medrunner Assistant',
+		status_running: 'L�uft',
 		status_stopped: 'Gestoppt',
 		btn_start: 'Start',
 		btn_stop: 'Stop',
@@ -33,26 +90,28 @@ const translations = {
 		tab_settings: 'Einstellungen',
 		tab_console: 'Konsole',
 		sounds_title: 'Sound-Dateien',
-		sounds_desc: 'Wähle die Sounds für verschiedene Events. Die Dateien müssen im .wav-Format vorliegen.',
+		sounds_desc: 'W�hle die Sounds f�r verschiedene Events. Die Dateien m�ssen im .wav-Format vorliegen.',
 		alert_sound_label: 'Alert-Sound',
 		chat_sound_label: 'Chat-Nachricht Sound',
 		team_sound_label: 'Team-Beitritt Sound',
 		browse: 'Durchsuchen',
-		available_sounds_title: 'Verfügbare Sounds im sounds/-Ordner:',
+		available_sounds_title: 'Verf�gbare Sounds im sounds/-Ordner:',
 		sounds_none: 'Keine Sounds gefunden',
-		team_no_data: 'Keine Daten verfügbar. Starte den Assistant, um die Team-Mitglieder zu sehen.',
+		team_no_data: 'Keine Daten verf�gbar. Starte den Assistant, um die Team-Mitglieder zu sehen.',
 		table_rsi: 'RSI Handle',
 		table_discord: 'Discord ID',
 		table_role: 'Rolle',
-		logs_empty: 'Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.',
-		logs_cleared: 'Logs gelöscht',
+		table_joined: 'Beitrittszeit',
+		table_order: 'Reihenfolge',
+		logs_empty: 'Keine Logs verf�gbar. Starte den Assistant, um Logs zu sehen.',
+		logs_cleared: 'Logs gel�scht',
 		assistant_stopped_code: (code) => `Assistant beendet mit Code ${code}`,
-		alert_test_running: '⏳ Läuft...',
-		start_failed: (msg) => `❌ Start fehlgeschlagen: ${msg}`,
-		save_token_required: '⚠️ Medrunner Token ist erforderlich!',
-		save_ok: '✅ Einstellungen gespeichert!',
-		save_restart_failed: (msg) => `⚠️ Gespeichert, aber Neustart fehlgeschlagen: ${msg}`,
-		save_error_generic: '❌ Fehler beim Speichern',
+		alert_test_running: '? L�uft...',
+		start_failed: (msg) => `? Start fehlgeschlagen: ${msg}`,
+		save_token_required: '?? Medrunner Token ist erforderlich!',
+		save_ok: '? Einstellungen gespeichert!',
+		save_restart_failed: (msg) => `?? Gespeichert, aber Neustart fehlgeschlagen: ${msg}`,
+		save_error_generic: '? Fehler beim Speichern',
 		timestampLocale: 'de-DE',
 		features_title: 'Features aktivieren/deaktivieren',
 		features_desc: 'Aktiviere oder deaktiviere einzelne Features nach Bedarf.',
@@ -61,17 +120,17 @@ const translations = {
 		feature_chat_title: 'Custom Chat Message Sound',
 		feature_chat_desc: 'Spielt einen Sound bei eingehenden Client-Nachrichten',
 		feature_team_title: 'Custom Team Join Sound',
-		feature_team_desc: 'Benachrichtigt dich, wenn jemand deinem Team beitreten möchte',
+		feature_team_desc: 'Benachrichtigt dich, wenn jemand deinem Team beitreten m�chte',
 		feature_ship_title: 'Print Ship Assignments',
 		feature_ship_desc: 'Zeigt Schiffszuweisungen in der Konsole an',
 		feature_order_title: 'Print Team Join Order',
 		feature_order_desc: 'Zeigt die Reihenfolge der Team-Beitritte an',
 		overlay_title: 'Overlay Einstellungen',
-		overlay_desc: 'Konfiguriere das visuelle Overlay für Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.',
+		overlay_desc: 'Konfiguriere das visuelle Overlay f�r Alerts: Position, Dauer, Rand- und Hintergrund-Effekte.',
 		overlay_enable_title: 'Overlay aktivieren',
 		overlay_enable_desc: 'Zeigt visuelles Feedback bei neuen Alerts',
-		overlay_text_percent_label: 'Textgröße (%) — 100% entspricht Größe 400',
-		overlay_monitor_label: 'Monitor auswählen',
+		overlay_text_percent_label: 'Textgr��e (%) � 100% entspricht Gr��e 400',
+		overlay_monitor_label: 'Monitor ausw�hlen',
 		overlay_position_effect_label: 'Text-Position & Effekt',
 		overlay_radio_top: 'Oben (Slider + Puls)',
 		overlay_radio_center: 'Mitte (Einblendung + Puls)',
@@ -90,7 +149,7 @@ const translations = {
 		overlay_duration_label: 'Dauer (ms)',
 		debug_test_title: 'Debug & Test Optionen',
 		debug_mode_title: 'Debug-Modus',
-		debug_mode_desc: 'Zeigt zusätzliche Debug-Informationen in der Konsole',
+		debug_mode_desc: 'Zeigt zus�tzliche Debug-Informationen in der Konsole',
 		test_mode_title: 'Test Mode',
 		test_mode_desc: 'Wenn aktiviert, werden alle Test-Buttons sichtbar.',
 		api_config_title: 'API Konfiguration (Test Mode)',
@@ -99,11 +158,11 @@ const translations = {
 		api_env_dev: 'Development',
 		dev_api_key_label: 'Dev API Key',
 		alert_test_title: 'Alert Test Full',
-		alert_test_desc: 'Spielt Alert-Sound und zeigt Overlay gemäß Monitor-Auswahl.',
-		alert_test_run_btn: 'Alert-Test ausführen',
+		alert_test_desc: 'Spielt Alert-Sound und zeigt Overlay gem�� Monitor-Auswahl.',
+		alert_test_run_btn: 'Alert-Test ausf�hren',
 	},
 	en: {
-		header_title: '🚑 Medrunner Assistant',
+		header_title: 'Medrunner Assistant',
 		status_running: 'Running',
 		status_stopped: 'Stopped',
 		btn_start: 'Start',
@@ -126,15 +185,17 @@ const translations = {
 		table_rsi: 'RSI Handle',
 		table_discord: 'Discord ID',
 		table_role: 'Role',
+		table_joined: 'Joined',
+		table_order: 'Order',
 		logs_empty: 'No logs available. Start the assistant to see logs.',
 		logs_cleared: 'Logs cleared',
 		assistant_stopped_code: (code) => `Assistant stopped with code ${code}`,
-		alert_test_running: '⏳ Running...',
-		start_failed: (msg) => `❌ Start failed: ${msg}`,
-		save_token_required: '⚠️ Medrunner token is required!',
-		save_ok: '✅ Settings saved!',
-		save_restart_failed: (msg) => `⚠️ Saved, but restart failed: ${msg}`,
-		save_error_generic: '❌ Error while saving',
+		alert_test_running: '? Running...',
+		start_failed: (msg) => `? Start failed: ${msg}`,
+		save_token_required: '?? Medrunner token is required!',
+		save_ok: '? Settings saved!',
+		save_restart_failed: (msg) => `?? Saved, but restart failed: ${msg}`,
+		save_error_generic: '? Error while saving',
 		timestampLocale: 'en-US',
 		features_title: 'Enable/Disable Features',
 		features_desc: 'Toggle individual features as needed.',
@@ -152,7 +213,7 @@ const translations = {
 		overlay_desc: 'Configure the visual overlay for alerts: position, duration, border and background effects.',
 		overlay_enable_title: 'Enable Overlay',
 		overlay_enable_desc: 'Shows visual feedback for new alerts',
-		overlay_text_percent_label: 'Text size (%) — 100% equals size 400',
+		overlay_text_percent_label: 'Text size (%) � 100% equals size 400',
 		overlay_monitor_label: 'Select monitor',
 		overlay_position_effect_label: 'Text Position & Effect',
 		overlay_radio_top: 'Top (Slider + Pulse)',
@@ -183,6 +244,7 @@ const translations = {
 		alert_test_title: 'Alert Test Full',
 		alert_test_desc: 'Plays alert sound and shows overlay according to monitor selection.',
 		alert_test_run_btn: 'Run Alert Test',
+		more_settings_title: 'More Settings',
 		// Tooltips
 		tooltip_browse: 'Select WAV file',
 		tooltip_sound_path: 'Path to WAV file',
@@ -196,6 +258,8 @@ const translations = {
 	}
 };
 
+const POSITION_STORAGE_KEY = 'manual_position_state';
+
 function getLang() {
 	const sel = document.getElementById('language');
 	return sel ? (sel.value || (currentSettings.LANGUAGE || 'de')) : (currentSettings.LANGUAGE || 'de');
@@ -206,6 +270,129 @@ function t(key, ...args) {
 	const value = translations[lang][key];
 	if (typeof value === 'function') return value(...args);
 	return value;
+}
+
+function updatePositionDisplay() {
+	if (!positionDisplay) return;
+	const { pos, total } = manualPosition;
+	if (pos && total) {
+		positionDisplay.textContent = `Pos ${pos}/${total}`;
+	} else {
+		positionDisplay.textContent = 'Pos -/-';
+	}
+}
+
+function loadManualPositionFromStorage() {
+	try {
+		const stored = localStorage.getItem(POSITION_STORAGE_KEY);
+		if (stored) {
+			const parsed = JSON.parse(stored);
+			if (parsed && parsed.pos && parsed.total) {
+				manualPosition = { pos: parseInt(parsed.pos, 10), total: parseInt(parsed.total, 10) };
+			}
+		}
+	} catch (e) {
+		console.warn('Failed to load manual position from storage:', e);
+	}
+	syncTeamPositionControls();
+	updatePositionDisplay();
+}
+
+function saveManualPosition() {
+	try {
+		localStorage.setItem(POSITION_STORAGE_KEY, JSON.stringify(manualPosition));
+	} catch (e) {
+		console.warn('Failed to save manual position:', e);
+	}
+}
+
+function syncTeamPositionControls() {
+	if (teamPositionSelect) teamPositionSelect.value = manualPosition.pos || '1';
+	if (teamCountSelect) teamCountSelect.value = manualPosition.total || '1';
+}
+
+function promptPositionEntry() {
+	const currentText = manualPosition.pos && manualPosition.total ? `${manualPosition.pos}/${manualPosition.total}` : '';
+	const input = prompt('Position/Teams (z.B. 1/3)', currentText);
+	if (!input) return;
+	const parts = input.split('/');
+	if (parts.length !== 2) return alert('Bitte im Format Position/Teams eingeben, z.B. 1/3');
+	const pos = parseInt(parts[0], 10);
+	const total = parseInt(parts[1], 10);
+	if (!Number.isInteger(pos) || !Number.isInteger(total) || pos < 1 || total < 1) {
+		return alert('Nur positive Zahlen erlaubt (Format 1/3)');
+	}
+	manualPosition = { pos, total };
+	saveManualPosition();
+	updatePositionDisplay();
+}
+
+function copyPositionToClipboard() {
+	const pos = manualPosition.pos;
+	const total = manualPosition.total;
+	let text = 'Position -/-';
+	if (pos && total) {
+		const posEmojis = {
+			1: '<:P1:1432823559364935852>',
+			2: '<:P2:1432823562437638144>',
+			3: '<:P3:1432823565624305756>',
+			4: '<:P4:1432823568389513296>',
+			5: '<:P5:1432823570583189624>',
+		};
+		const sb = [
+			'<:SB1:1182246721129025657>',
+			'<:SB2:1182246723981164665>',
+			'<:SB3:1182246726137036891>',
+			'<:SB4:1182246729844797440>',
+			'<:SB5:1182246731447021589>',
+			'<:SB6:1182246733946818620>',
+			'<:SB7:1182246735616155648>',
+		];
+		const ts = Math.floor(Date.now() / 1000);
+		const posEmoji = posEmojis[pos] || `P${pos}`;
+		text = `${posEmoji}${sb.join('')}<t:${ts}:R>`;
+	}
+
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(() => {
+			console.log('[copyPosition] copied', text);
+		}).catch(() => {
+			fallbackCopy(text);
+		});
+	} else {
+		fallbackCopy(text);
+	}
+}
+
+function fallbackCopy(text) {
+	try {
+		const ta = document.createElement('textarea');
+		ta.value = text;
+		ta.style.position = 'fixed';
+		ta.style.top = '-1000px';
+		document.body.appendChild(ta);
+		ta.focus();
+		ta.select();
+		document.execCommand('copy');
+		document.body.removeChild(ta);
+	} catch (e) {
+		console.warn('Copy failed:', e);
+	}
+}
+
+function copyAlertToClipboard() {
+	const ts = Math.floor(Date.now() / 1000);
+	const text = `<a:AlertBlue:1064652389711360043><a:AlertRed:985293780288700476><:AA1:1182246601557823520><:AA2:1182246604401561610><:AA3:1182246605718556682><:AA4:1182246607228514304><:AA5:1182246610189692938><:AA6:1182246613150859304><:AA7:1182246614665019393><:AA8:1182246617559072838><a:AlertRed:985293780288700476><a:AlertBlue:1064652389711360043><t:${ts}:R>`;
+	
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(() => {
+			console.log('[copyAlert] copied', text);
+		}).catch(() => {
+			fallbackCopy(text);
+		});
+	} else {
+		fallbackCopy(text);
+	}
 }
 
 function applyTranslations() {
@@ -234,11 +421,14 @@ function applyTranslations() {
 		? 'Real-time logs from the running assistant. This tab is visible when Debug Mode is enabled.'
 		: 'Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.';
 	// Save button
-	const saveBtnEl = document.getElementById('save-btn');
-	if (saveBtnEl) saveBtnEl.textContent = getLang() === 'en' ? '💾 Save Settings' : '💾 Einstellungen speichern';
+	const saveBtnEl = document.getElementById('save-btn-settings');
+	if (saveBtnEl) {
+		const lang = getLang();
+		saveBtnEl.textContent = lang === 'en' ? '💾 Speichern' : '💾 Speichern';
+	}
 	// Clear logs button
 	const clearLogsEl = document.getElementById('clear-logs');
-	if (clearLogsEl) clearLogsEl.textContent = getLang() === 'en' ? 'Clear Logs' : 'Logs löschen';
+	if (clearLogsEl) clearLogsEl.textContent = getLang() === 'en' ? 'Clear Logs' : 'Logs l�schen';
 
 	// Header
 	const headerTitle = document.getElementById('header-title');
@@ -247,8 +437,12 @@ function applyTranslations() {
 	// Sounds tab
 	const soundsTitle = document.getElementById('sounds-title');
 	if (soundsTitle) soundsTitle.textContent = t('sounds_title');
+	const soundsTitleAccordion = document.getElementById('sounds-title-accordion');
+	if (soundsTitleAccordion) soundsTitleAccordion.textContent = t('sounds_title');
 	const soundsDesc = document.getElementById('sounds-desc');
 	if (soundsDesc) soundsDesc.textContent = t('sounds_desc');
+	const soundsDescAccordion = document.getElementById('sounds-desc-accordion');
+	if (soundsDescAccordion) soundsDescAccordion.textContent = t('sounds_desc');
 	const alertLabel = document.getElementById('alert-sound-label');
 	if (alertLabel) alertLabel.textContent = t('alert_sound_label');
 	const chatLabel = document.getElementById('chat-sound-label');
@@ -271,8 +465,12 @@ function applyTranslations() {
 	// Features tab
 	const featuresTitle = document.getElementById('features-title');
 	if (featuresTitle) featuresTitle.textContent = t('features_title');
+	const featuresTitleAccordion = document.getElementById('features-title-accordion');
+	if (featuresTitleAccordion) featuresTitleAccordion.textContent = t('features_title');
 	const featuresDesc = document.getElementById('features-desc');
 	if (featuresDesc) featuresDesc.textContent = t('features_desc');
+	const featuresDescAccordion = document.getElementById('features-desc-accordion');
+	if (featuresDescAccordion) featuresDescAccordion.textContent = t('features_desc');
 	const featAlertTitle = document.getElementById('feature-alert-title');
 	if (featAlertTitle) featAlertTitle.textContent = t('feature_alert_title');
 	const featAlertDesc = document.getElementById('feature-alert-desc');
@@ -297,8 +495,12 @@ function applyTranslations() {
 	// Overlay tab
 	const overlayTitle = document.getElementById('overlay-title');
 	if (overlayTitle) overlayTitle.textContent = t('overlay_title');
+	const overlayTitleAccordion = document.getElementById('overlay-title-accordion');
+	if (overlayTitleAccordion) overlayTitleAccordion.textContent = t('overlay_title');
 	const overlayDesc = document.getElementById('overlay-desc');
 	if (overlayDesc) overlayDesc.textContent = t('overlay_desc');
+	const overlayDescAccordion = document.getElementById('overlay-desc-accordion');
+	if (overlayDescAccordion) overlayDescAccordion.textContent = t('overlay_desc');
 	const overlayEnableTitle = document.getElementById('overlay-enable-title');
 	if (overlayEnableTitle) overlayEnableTitle.textContent = t('overlay_enable_title');
 	const overlayEnableDesc = document.getElementById('overlay-enable-desc');
@@ -382,6 +584,8 @@ function applyTranslations() {
 		alertTestBtn.textContent = t('alert_test_run_btn');
 		alertTestBtn.title = t('tooltip_alert_test');
 	}
+	const moreSettingsTitle = document.getElementById('more-settings-title');
+	if (moreSettingsTitle) moreSettingsTitle.textContent = t('more_settings_title');
 }
 
 // Initialize DOM Elements and setup event listeners
@@ -389,16 +593,27 @@ function initializeDOMElements() {
 	// Select DOM Elements
 	tabs = document.querySelectorAll('.tab-btn');
 	tabContents = document.querySelectorAll('.tab-content');
-	saveBtn = document.getElementById('save-btn');
+	saveBtn = document.getElementById('save-btn-settings');
 	saveStatus = document.getElementById('save-status');
 	startStopBtn = document.getElementById('start-stop-btn');
 	statusIndicator = document.getElementById('status-indicator');
 	statusText = document.getElementById('status-text');
 	statusDot = document.getElementById('status-dot');
+	positionPill = document.getElementById('position-pill');
+	positionDisplay = document.getElementById('position-display');
+	copyPositionBtn = document.getElementById('copy-position-btn');
+	teamPositionSelect = document.getElementById('team-position-select');
+	teamCountSelect = document.getElementById('team-count-select');
+	teamPositionSaveBtn = document.getElementById('team-position-save');
 	logOutput = document.getElementById('log-output');
 	clearLogsBtn = document.getElementById('clear-logs');
 	toggleTokenBtn = document.getElementById('toggle-token');
 	tokenInput = document.getElementById('medrunner-token');
+	
+	console.log('[initializeDOMElements] DOM Elements initialized');
+	console.log('[initializeDOMElements] tabs count:', tabs.length);
+	console.log('[initializeDOMElements] startStopBtn:', startStopBtn);
+	console.log('[initializeDOMElements] saveBtn:', saveBtn);
 	
 	// Initialize Form Elements
 	formElements = {
@@ -424,24 +639,54 @@ function initializeDOMElements() {
 		DEV_API_KEY: document.getElementById('dev-api-key'),
 	};
 	
-	// Tab switching
+	// Tab switching with simple event delegation
 	tabs.forEach(tab => {
-		tab.addEventListener('click', () => {
+		tab.addEventListener('click', (e) => {
+			e.preventDefault();
 			const targetTab = tab.dataset.tab;
-			
-			tabs.forEach(t => t.classList.remove('active'));
-			tabContents.forEach(tc => tc.classList.remove('active'));
-			
-			tab.classList.add('active');
-			document.querySelector(`.tab-content[data-tab="${targetTab}"]`).classList.add('active');
+			console.log('[Tab Click] Switching to:', targetTab);
+			window.switchTab(targetTab);
 		});
 	});
+	console.log('[initializeDOMElements] Tab event listeners attached');
 	
 	// Event Listeners
-	saveBtn.addEventListener('click', saveSettings);
-	startStopBtn.addEventListener('click', toggleAssistant);
-	clearLogsBtn.addEventListener('click', clearLogs);
-	toggleTokenBtn.addEventListener('click', toggleTokenVisibility);
+	if (saveBtn) {
+		saveBtn.addEventListener('click', saveSettings);
+		console.log('[initializeDOMElements] Save button listener attached');
+	}
+	if (startStopBtn) {
+		startStopBtn.addEventListener('click', toggleAssistant);
+		console.log('[initializeDOMElements] Start/Stop button listener attached');
+	}
+	if (clearLogsBtn) {
+		clearLogsBtn.addEventListener('click', clearLogs);
+		console.log('[initializeDOMElements] Clear Logs button listener attached');
+	}
+	if (toggleTokenBtn) {
+		toggleTokenBtn.addEventListener('click', toggleTokenVisibility);
+		console.log('[initializeDOMElements] Toggle Token button listener attached');
+	}
+
+	if (positionDisplay) {
+		positionDisplay.addEventListener('click', promptPositionEntry);
+		console.log('[initializeDOMElements] Position display listener attached');
+	}
+
+	if (copyPositionBtn) {
+		copyPositionBtn.addEventListener('click', copyPositionToClipboard);
+		console.log('[initializeDOMElements] Copy position button listener attached');
+	}
+
+	if (teamPositionSaveBtn) {
+		teamPositionSaveBtn.addEventListener('click', () => {
+			const pos = parseInt(teamPositionSelect?.value, 10) || 1;
+			const total = parseInt(teamCountSelect?.value, 10) || 1;
+			manualPosition = { pos, total };
+			saveManualPosition();
+			updatePositionDisplay();
+		});
+	}
 
 	// Alert Full Test button
 	alertTestFullBtn = document.getElementById('alert-test-full');
@@ -453,13 +698,13 @@ function initializeDOMElements() {
 				alertTestFullBtn.textContent = t('alert_test_running');
 				const result = await window.api.testAlertFull();
 				if (result.success) {
-					addLog(getLang()==='en'?`✅ Alert Test Full started`:`✅ Alert Test Full gestartet`);
+					addLog(getLang()==='en'?`? Alert Test Full started`:`? Alert Test Full gestartet`);
 				} else {
-					addLog(getLang()==='en'?`❌ Alert Test Full failed: ${result.message}`:`❌ Alert Test Full fehlgeschlagen: ${result.message}`, true);
+					addLog(getLang()==='en'?`? Alert Test Full failed: ${result.message}`:`? Alert Test Full fehlgeschlagen: ${result.message}`, true);
 				}
 				alertTestFullBtn.textContent = originalText;
 			} catch (error) {
-				addLog(getLang()==='en'?`❌ Alert Test Full error: ${error.message}`:`❌ Alert Test Full Fehler: ${error.message}`, true);
+				addLog(getLang()==='en'?`? Alert Test Full error: ${error.message}`:`? Alert Test Full Fehler: ${error.message}`, true);
 			} finally {
 				alertTestFullBtn.disabled = false;
 			}
@@ -494,6 +739,28 @@ function initializeDOMElements() {
 			updateTestButtonsVisibility();
 			updateApiConfigVisibility();
 		});
+	}
+
+	// Initialize header status indicator
+	const header = document.querySelector('header');
+	if (header) {
+		header.classList.add('stopped');
+	}
+
+	if (positionDisplay) {
+		positionDisplay.addEventListener('click', promptPositionEntry);
+		console.log('[initializeDOMElements] Position display listener attached');
+	}
+
+	if (copyPositionBtn) {
+		copyPositionBtn.addEventListener('click', copyPositionToClipboard);
+		console.log('[initializeDOMElements] Copy position button listener attached');
+	}
+
+	const copyAlertBtn = document.getElementById('copy-alert-btn');
+	if (copyAlertBtn) {
+		copyAlertBtn.addEventListener('click', copyAlertToClipboard);
+		console.log('[initializeDOMElements] Copy alert button listener attached');
 	}
 }
 
@@ -612,7 +879,7 @@ async function saveSettings() {
 		
 		// Basic validation
 		if (!settings.MEDRUNNER_TOKEN || settings.MEDRUNNER_TOKEN.trim() === '') {
-			showStatus('⚠️ Medrunner Token ist erforderlich!', 'error');
+			showStatus('?? Medrunner Token ist erforderlich!', 'error');
 			return;
 		}
 		
@@ -621,16 +888,16 @@ async function saveSettings() {
 		if (result.success) {
 			currentSettings = settings;
 			if (result.restarted && result.restarted.success === false) {
-				showStatus(`⚠️ Gespeichert, aber Neustart fehlgeschlagen: ${result.restarted.message}`, 'error');
+				showStatus(`?? Gespeichert, aber Neustart fehlgeschlagen: ${result.restarted.message}`, 'error');
 			} else {
-				showStatus('✅ Einstellungen gespeichert!', 'success');
+				showStatus('? Einstellungen gespeichert!', 'success');
 			}
 		} else {
-			showStatus(`❌ Fehler: ${result.error}`, 'error');
+			showStatus(`? Fehler: ${result.error}`, 'error');
 		}
 	} catch (error) {
 		console.error('Failed to save settings:', error);
-		showStatus('❌ Fehler beim Speichern', 'error');
+		showStatus('? Fehler beim Speichern', 'error');
 	}
 }
 
@@ -710,31 +977,44 @@ async function toggleAssistant() {
 			if (result.success) {
 				updateAssistantStatus(true);
 			} else {
-				showStatus(`❌ Start fehlgeschlagen: ${result.message}`, 'error');
+				showStatus(`? Start fehlgeschlagen: ${result.message}`, 'error');
 			}
 		}
 	} catch (error) {
 		console.error('Failed to toggle assistant:', error);
-		showStatus('❌ Fehler beim Starten/Stoppen', 'error');
+		showStatus('? Fehler beim Starten/Stoppen', 'error');
 	}
 }
 
 // Update assistant status UI
 function updateAssistantStatus(running) {
 	isAssistantRunning = running;
+	const header = document.querySelector('header');
 	
 	if (running) {
-		statusIndicator.classList.add('running');
-		statusText.textContent = t('status_running');
-		startStopBtn.textContent = t('btn_stop');
-		startStopBtn.classList.remove('btn-primary');
-		startStopBtn.classList.add('btn-secondary');
+		if (statusIndicator) statusIndicator.classList.add('running');
+		if (statusText) statusText.textContent = t('status_running');
+		if (startStopBtn) {
+			startStopBtn.textContent = t('btn_stop');
+			startStopBtn.classList.remove('btn-primary');
+			startStopBtn.classList.add('btn-secondary');
+		}
+		if (header) {
+			header.classList.remove('stopped');
+			header.classList.add('running');
+		}
 	} else {
-		statusIndicator.classList.remove('running');
-		statusText.textContent = t('status_stopped');
-		startStopBtn.textContent = t('btn_start');
-		startStopBtn.classList.remove('btn-secondary');
-		startStopBtn.classList.add('btn-primary');
+		if (statusIndicator) statusIndicator.classList.remove('running');
+		if (statusText) statusText.textContent = t('status_stopped');
+		if (startStopBtn) {
+			startStopBtn.textContent = t('btn_start');
+			startStopBtn.classList.remove('btn-secondary');
+			startStopBtn.classList.add('btn-primary');
+		}
+		if (header) {
+			header.classList.remove('running');
+			header.classList.add('stopped');
+		}
 	}
 }
 
@@ -769,10 +1049,10 @@ function clearLogs() {
 function toggleTokenVisibility() {
 	if (tokenInput.type === 'password') {
 		tokenInput.type = 'text';
-		toggleTokenBtn.textContent = '🙈';
+		toggleTokenBtn.textContent = '??';
 	} else {
 		tokenInput.type = 'password';
-		toggleTokenBtn.textContent = '👁️';
+		toggleTokenBtn.textContent = '???';
 	}
 }
 
@@ -788,19 +1068,19 @@ function setupTestButtons() {
 			try {
 				button.disabled = true;
 				const originalText = button.textContent;
-				button.textContent = '⏳ Lädt...';
+				button.textContent = '? L�dt...';
 				
 				const result = await window.api.testFeature(featureName, testNumber);
 				
 				if (result.success) {
-					addLog(`✅ Test ${testNumber} für ${featureName}: ${result.message}`, false);
+					addLog(`? Test ${testNumber} f�r ${featureName}: ${result.message}`, false);
 				} else {
-					addLog(`❌ Test ${testNumber} fehlgeschlagen: ${result.message}`, true);
+					addLog(`? Test ${testNumber} fehlgeschlagen: ${result.message}`, true);
 				}
 				button.textContent = originalText;
 			} catch (error) {
-				addLog(`❌ Test-Fehler: ${error.message}`, true);
-				button.textContent = button.textContent.replace('⏳ Lädt...', `Test ${testNumber}`);
+				addLog(`? Test-Fehler: ${error.message}`, true);
+				button.textContent = button.textContent.replace('? L�dt...', `Test ${testNumber}`);
 			} finally {
 				button.disabled = false;
 			}
@@ -840,7 +1120,7 @@ function displayTeamMembers(members) {
 	const headerRow = document.createElement('tr');
 	headerRow.style.borderBottom = '2px solid var(--border)';
 	
-	const headers = [t('table_rsi'), t('table_discord'), t('table_role')];
+	const headers = [t('table_order'), t('table_rsi'), t('table_discord'), t('table_role'), t('table_joined')];
 	headers.forEach(headerText => {
 		const th = document.createElement('th');
 		th.textContent = headerText;
@@ -861,7 +1141,13 @@ function displayTeamMembers(members) {
 			row.style.backgroundColor = 'var(--surface)';
 		}
 		row.style.borderBottom = '1px solid var(--border)';
-		
+
+		const orderCell = document.createElement('td');
+		orderCell.textContent = (member.order != null ? String(member.order) : '-');
+		orderCell.style.padding = '0.75rem';
+		orderCell.style.color = 'var(--text)';
+		orderCell.style.fontWeight = 'bold';
+
 		const rsiHandle = document.createElement('td');
 		rsiHandle.textContent = member.rsiHandle || '-';
 		rsiHandle.style.padding = '0.75rem';
@@ -877,10 +1163,26 @@ function displayTeamMembers(members) {
 		role.textContent = member.role || '-';
 		role.style.padding = '0.75rem';
 		role.style.color = 'var(--text)';
+
+		const joined = document.createElement('td');
+		if (member.joinedAt != null) {
+			try {
+				const d = new Date(member.joinedAt);
+				joined.textContent = d.toLocaleString(translations[getLang()].timestampLocale);
+			} catch (_) {
+				joined.textContent = '-';
+			}
+		} else {
+			joined.textContent = '-';
+		}
+		joined.style.padding = '0.75rem';
+		joined.style.color = 'var(--text)';
 		
+		row.appendChild(orderCell);
 		row.appendChild(rsiHandle);
 		row.appendChild(discordId);
 		row.appendChild(role);
+		row.appendChild(joined);
 		tbody.appendChild(row);
 	});
 	table.appendChild(tbody);
@@ -946,7 +1248,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await loadAvailableMonitors();
 	await checkInitialStatus();
 	setupTestButtons();
-	loadTeamMembers();
+	await loadTeamMembers();
+	await loadShipAndAARModules(); // Load ship assignment and AAR modules
+	loadManualPositionFromStorage();
 
 	// Re-apply translations when language changes
 	const langSelect = document.getElementById('language');
@@ -957,3 +1261,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 		});
 	}
 });
+
+// Global functions will be loaded from shipaar-init.js during DOMContentLoaded

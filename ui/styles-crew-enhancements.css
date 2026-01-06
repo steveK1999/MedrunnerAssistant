@@ -1,0 +1,141 @@
+/* Ship Assignment Enhanced Styles */
+
+/* Crew Input and Select Styling */
+.crew-input {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--surface-light);
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.crew-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    background-color: var(--surface);
+}
+
+.crew-select {
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background-color: var(--surface-light);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.2s ease;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    background-size: 1rem;
+    padding-right: 2rem;
+}
+
+.crew-select:hover {
+    border-color: var(--primary-light);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.15);
+}
+
+.crew-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+    background-color: var(--surface);
+}
+
+/* Enhanced Ship Card Buttons */
+.ship-card .btn {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.ship-card .btn-success {
+    background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+    color: white;
+}
+
+.ship-card .btn-success:hover {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    transform: translateY(-2px);
+}
+
+.ship-card .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+
+.ship-card .btn-danger:hover {
+    background: linear-gradient(135deg, #f87171 0%, #b91c1c 100%);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Crew Member Row Styling */
+.crew-member {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.crew-member::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary-light);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.crew-member:hover {
+    background: var(--surface-light);
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}
+
+.crew-member:hover::before {
+    opacity: 1;
+}
+
+/* Remove Button Styling for Crew */
+.crew-member .btn-danger {
+    padding: 0.5rem 0.65rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* Section Labels Enhancement */
+.ship-card strong {
+    color: var(--primary-light);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Improved Preview Area */
+#preview {
+    background-color: var(--surface-light) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text) !important;
+    padding: 1.25rem !important;
+    font-family: 'Courier New', monospace !important;
+}
