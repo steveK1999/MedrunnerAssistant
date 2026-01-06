@@ -42,6 +42,10 @@ async function initializeShipAndAARModules() {
         window.closeImportModal = shipAssignmentModule.closeImportModal;
         window.confirmClearShipAssignments = shipAssignmentModule.confirmClearShipAssignments;
         window.updateCrewNameDatalist = shipAssignmentModule.updateCrewNameDatalist;
+        window.handleCrewDragStart = shipAssignmentModule.handleCrewDragStart;
+        window.handleCrewDragEnd = shipAssignmentModule.handleCrewDragEnd;
+        window.handleCrewDragOver = shipAssignmentModule.handleCrewDragOver;
+        window.handleCrewDrop = shipAssignmentModule.handleCrewDrop;
 
         if (shipAssignmentModule.initializeTeamMemberSync) {
             await shipAssignmentModule.initializeTeamMemberSync();

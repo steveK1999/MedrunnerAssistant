@@ -380,6 +380,21 @@ function fallbackCopy(text) {
 	}
 }
 
+function copyAlertToClipboard() {
+	const ts = Math.floor(Date.now() / 1000);
+	const text = `<a:AlertBlue:1064652389711360043><a:AlertRed:985293780288700476><:AA1:1182246601557823520><:AA2:1182246604401561610><:AA3:1182246605718556682><:AA4:1182246607228514304><:AA5:1182246610189692938><:AA6:1182246613150859304><:AA7:1182246614665019393><:AA8:1182246617559072838><a:AlertRed:985293780288700476><a:AlertBlue:1064652389711360043><t:${ts}:R>`;
+	
+	if (navigator.clipboard && navigator.clipboard.writeText) {
+		navigator.clipboard.writeText(text).then(() => {
+			console.log('[copyAlert] copied', text);
+		}).catch(() => {
+			fallbackCopy(text);
+		});
+	} else {
+		fallbackCopy(text);
+	}
+}
+
 function applyTranslations() {
 	// Set document language for accessibility
 	const lang = getLang();
@@ -730,6 +745,7 @@ function initializeDOMElements() {
 	const header = document.querySelector('header');
 	if (header) {
 		header.classList.add('stopped');
+	}
 
 	if (positionDisplay) {
 		positionDisplay.addEventListener('click', promptPositionEntry);
@@ -740,6 +756,11 @@ function initializeDOMElements() {
 		copyPositionBtn.addEventListener('click', copyPositionToClipboard);
 		console.log('[initializeDOMElements] Copy position button listener attached');
 	}
+
+	const copyAlertBtn = document.getElementById('copy-alert-btn');
+	if (copyAlertBtn) {
+		copyAlertBtn.addEventListener('click', copyAlertToClipboard);
+		console.log('[initializeDOMElements] Copy alert button listener attached');
 	}
 }
 

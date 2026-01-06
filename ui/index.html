@@ -19,8 +19,9 @@
             <div class="header-actions" style="gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
                 <div class="position-pill" id="position-pill" title="Eigene Position und Teamanzahl festlegen">
                     <span id="position-display">Pos -/-</span>
-                    <button class="btn btn-secondary" id="copy-position-btn" style="padding: 4px 8px; font-size: 0.85rem;">Copy</button>
+                    <button id="copy-position-btn" style="padding: 6px 12px; font-size: 1rem; font-weight: bold; background-color: white; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">SB</button>
                 </div>
+                <button id="copy-alert-btn" title="Alert-Rundlicht kopieren" style="padding: 6px 12px; font-size: 1.2rem; background-color: #1a1a1a; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">🚨</button>
                 <div class="status-indicator" id="status-indicator">
                     <span class="status-dot" id="status-dot"></span>
                     <span id="status-text">Gestoppt</span>
@@ -46,26 +47,26 @@
                 </p>
 
                 <div class="form-group">
-                    <label for="alert-sound" id="alert-sound-label">Alert-Sound</label>
+                    <label for="alert-sound-old" id="alert-sound-label-old">Alert-Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="alert-sound" placeholder="./sounds/alert.wav">
-                        <button type="button" class="btn btn-secondary" data-select="alert-sound" id="browse-alert">Durchsuchen</button>
+                        <input type="text" id="alert-sound-old" placeholder="./sounds/alert.wav">
+                        <button type="button" class="btn btn-secondary" data-select="alert-sound-old" id="browse-alert-old">Durchsuchen</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="chat-sound" id="chat-sound-label">Chat-Nachricht Sound</label>
+                    <label for="chat-sound-old" id="chat-sound-label-old">Chat-Nachricht Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="chat-sound" placeholder="./sounds/chat.wav">
-                        <button type="button" class="btn btn-secondary" data-select="chat-sound" id="browse-chat">Durchsuchen</button>
+                        <input type="text" id="chat-sound-old" placeholder="./sounds/chat.wav">
+                        <button type="button" class="btn btn-secondary" data-select="chat-sound-old" id="browse-chat-old">Durchsuchen</button>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="team-sound" id="team-sound-label">Team-Beitritt Sound</label>
+                    <label for="team-sound-old" id="team-sound-label-old">Team-Beitritt Sound</label>
                     <div class="file-input-group">
-                        <input type="text" id="team-sound" placeholder="./sounds/team.wav">
-                        <button type="button" class="btn btn-secondary" data-select="team-sound" id="browse-team">Durchsuchen</button>
+                        <input type="text" id="team-sound-old" placeholder="./sounds/team.wav">
+                        <button type="button" class="btn btn-secondary" data-select="team-sound-old" id="browse-team-old">Durchsuchen</button>
                     </div>
                 </div>
 
@@ -92,7 +93,7 @@
                         </div>
                         <div class="feature-controls">
                             <label class="switch">
-                                <input type="checkbox" id="enable-alert-sound">
+                                <input type="checkbox" id="enable-alert-sound-old">
                                 <span class="slider"></span>
                             </label>
                             <button class="btn btn-test" data-test="alert-sound">Test 1</button>
