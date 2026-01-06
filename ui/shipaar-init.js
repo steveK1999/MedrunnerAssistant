@@ -43,6 +43,10 @@ async function initializeShipAndAARModules() {
         window.confirmClearShipAssignments = shipAssignmentModule.confirmClearShipAssignments;
         window.updateCrewNameDatalist = shipAssignmentModule.updateCrewNameDatalist;
 
+        if (shipAssignmentModule.initializeTeamMemberSync) {
+            await shipAssignmentModule.initializeTeamMemberSync();
+        }
+
         // Expose all AAR functions globally
         window.populateAARPlanetDropdown = aarModule.populateAARPlanetDropdown;
         window.populateAARShipDropdowns = aarModule.populateAARShipDropdowns;
