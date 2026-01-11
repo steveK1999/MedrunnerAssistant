@@ -42,11 +42,13 @@ function stringifyEnvFile(settings) {
 			"CUSTOM_ALERT_SOUND",
 			"CUSTOM_CHATMESSAGE_SOUND",
 			"CUSTOM_TEAMJOIN_SOUND",
+			"CUSTOM_UNASSIGNED_SOUND",
 		],
 		features: [
 			"ENABLE_CUSTOM_ALERT_SOUND",
 			"ENABLE_CUSTOM_CHATMESSAGE_SOUND",
 			"ENABLE_CUSTOM_TEAMJOIN_SOUND",
+			"ENABLE_CUSTOM_UNASSIGNED_SOUND",
 			"ENABLE_PRINT_SHIPASSIGNMENTS",
 			"ENABLE_PRINT_TEAMJOINORDER",
 			"ENABLE_TEAM_MEMBERS",
@@ -133,9 +135,11 @@ function getDefaultSettings() {
 		CUSTOM_ALERT_SOUND: path.join(soundsPath, "alert.wav"),
 		CUSTOM_CHATMESSAGE_SOUND: path.join(soundsPath, "chat.wav"),
 		CUSTOM_TEAMJOIN_SOUND: path.join(soundsPath, "team.wav"),
+		CUSTOM_UNASSIGNED_SOUND: path.join(soundsPath, "alert.wav"),
 		ENABLE_CUSTOM_ALERT_SOUND: "true",
 		ENABLE_CUSTOM_CHATMESSAGE_SOUND: "true",
 		ENABLE_CUSTOM_TEAMJOIN_SOUND: "true",
+		ENABLE_CUSTOM_UNASSIGNED_SOUND: "true",
 		ENABLE_PRINT_SHIPASSIGNMENTS: "true",
 		ENABLE_PRINT_TEAMJOINORDER: "true",
 		ENABLE_TEAM_MEMBERS: "true",
@@ -337,6 +341,11 @@ function startAssistant() {
 				if (mainWindow) {
 					mainWindow.webContents.send("team-members-update", currentTeamMembers);
 				}
+			} else if (msg.type === "alert-started") {
+				console.log("[Assistant] Alert started:", msg.data.name);
+				if (mainWindow) {
+					mainWindow.webContents.send("alert-started", msg.data);
+				}
 			} else if (msg.type === "team-position-update") {
 				currentTeamPosition = msg.position || 1;
 				currentTeamCount = msg.teamCount || 1;
@@ -528,6 +537,43 @@ ipcMain.handle("test-alert-full", async () => {
 		return { success: true, message: "Alert Test Full gestartet" };
 	} catch (error) {
 		return { success: false, message: error.message };
+	}
+});
+
+// Workflow Builder Window
+let builderWindow = null;
+
+ipcMain.handle("open-workflow-builder", async () => {
+	if (builderWindow) {
+		builderWindow.focus();
+		return { success: true };
+	}
+
+	builderWindow = new BrowserWindow({
+		width: 1400,
+		height: 900,
+		webPreferences: {
+			nodeIntegration: true,
+			contextIsolation: false
+		},
+		title: "Alert Workflow Builder",
+		autoHideMenuBar: true
+	});
+
+	builderWindow.loadFile(path.join(__dirname, "ui", "workflow-builder.html"));
+
+	builderWindow.on("closed", () => {
+		builderWindow = null;
+	});
+
+	return { success: true };
+});
+
+ipcMain.on("workflow-updated", (event, workflow) => {
+	console.log("[Main] Workflow updated:", workflow.name);
+	// Notify main window to reload workflow
+	if (mainWindow) {
+		mainWindow.webContents.send("workflow-updated", workflow);
 	}
 });
 

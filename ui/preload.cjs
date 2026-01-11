@@ -42,6 +42,9 @@ contextBridge.exposeInMainWorld("api", {
 	onTeamMembersUpdate: (callback) => {
 		ipcRenderer.on("team-members-update", (event, members) => callback(members));
 	},
+	onAlertStarted: (callback) => {
+		ipcRenderer.on("alert-started", (event, alertData) => callback(alertData));
+	},
 	onTeamPositionUpdate: (callback) => {
 		ipcRenderer.on("team-position-changed", (event, data) => callback(data));
 	},

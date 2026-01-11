@@ -22,6 +22,9 @@ contextBridge.exposeInMainWorld("api", {
 	getTeamMembers: () => ipcRenderer.invoke("get-team-members"),
 	testAlertFull: () => ipcRenderer.invoke("test-alert-full"),
 	
+	// Workflow
+	openWorkflowBuilder: () => ipcRenderer.invoke("open-workflow-builder"),
+	
 	// Event listeners
 	onAssistantLog: (callback) => {
 		ipcRenderer.on("assistant-log", (event, message) => callback(message));
@@ -37,5 +40,11 @@ contextBridge.exposeInMainWorld("api", {
 	},
 	onTeamMembersUpdate: (callback) => {
 		ipcRenderer.on("team-members-update", (event, members) => callback(members));
+	},
+	onAlertStarted: (callback) => {
+		ipcRenderer.on("alert-started", (event, alertData) => callback(alertData));
+	},
+	onWorkflowUpdated: (callback) => {
+		ipcRenderer.on("workflow-updated", (event, workflow) => callback(workflow));
 	},
 });

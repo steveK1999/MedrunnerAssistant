@@ -34,6 +34,24 @@ export async function callback(alert) {
 			console.error("Failed to show alert overlay:", e);
 		});
 	}
+
+	// Forward alert name to Electron UI for dropdown population
+	try {
+		if (typeof process !== "undefined" && typeof process.send === "function") {
+			process.send({
+				type: "alert-started",
+				data: {
+					name: alert.missionName || alert.name || "Unknown Alert",
+					timestamp: Date.now(),
+					alertId: alert.id || null,
+					location: alert.location || null
+				}
+			});
+		}
+	} catch (e) {
+		// Non-fatal; just log
+		console.error("Failed to send alert-started message:", e.message);
+	}
 }
 
 export async function test(number) {

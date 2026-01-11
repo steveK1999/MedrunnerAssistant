@@ -8,6 +8,7 @@
 // Dynamic import of the modules
 let shipAssignmentModule;
 let aarModule;
+let alertTimerModule;
 
 // Function to initialize the modules
 async function initializeShipAndAARModules() {
@@ -16,6 +17,7 @@ async function initializeShipAndAARModules() {
         const constants = await import('../lib/constants.js');
         shipAssignmentModule = await import('../lib/shipAssignment.js');
         aarModule = await import('../lib/aar.js');
+        alertTimerModule = await import('../lib/alert-timer.js');
 
         // Make SHIPS and EMOJIS global for use in HTML
         window.SHIPS = constants.SHIPS;
@@ -37,6 +39,7 @@ async function initializeShipAndAARModules() {
         window.generateOutput = shipAssignmentModule.generateOutput;
         window.updatePreview = shipAssignmentModule.updatePreview;
         window.copyToClipboard = shipAssignmentModule.copyToClipboard;
+        window.autoFillShipAssignments = shipAssignmentModule.autoFillShipAssignments;
         window.importFromDiscord = shipAssignmentModule.importFromDiscord;
         window.openImportModal = shipAssignmentModule.openImportModal;
         window.closeImportModal = shipAssignmentModule.closeImportModal;
@@ -46,6 +49,10 @@ async function initializeShipAndAARModules() {
         window.handleCrewDragEnd = shipAssignmentModule.handleCrewDragEnd;
         window.handleCrewDragOver = shipAssignmentModule.handleCrewDragOver;
         window.handleCrewDrop = shipAssignmentModule.handleCrewDrop;
+        window.handleShipDragStart = shipAssignmentModule.handleShipDragStart;
+        window.handleShipDragEnd = shipAssignmentModule.handleShipDragEnd;
+        window.handleShipDragOver = shipAssignmentModule.handleShipDragOver;
+        window.handleShipDrop = shipAssignmentModule.handleShipDrop;
 
         if (shipAssignmentModule.initializeTeamMemberSync) {
             await shipAssignmentModule.initializeTeamMemberSync();
@@ -65,15 +72,33 @@ async function initializeShipAndAARModules() {
         window.clearAARForm = aarModule.clearAARForm;
         window.initializeAARForm = aarModule.initializeAARForm;
 
-        // Load saved ship assignments
-        shipAssignmentModule.loadShipAssignments();
+        // Expose all Alert Timer functions globally
+        window.advanceAlertTimer = alertTimerModule.advanceAlertTimer;
+        window.resetAlertTimer = alertTimerModule.resetAlertTimer;
+        window.confirmResetAlertTimer = alertTimerModule.confirmResetAlertTimer;
+        window.updateTimerDisplay = alertTimerModule.updateTimerDisplay;
+        window.updateTimerButton = alertTimerModule.updateTimerButton;
+        window.showTimerReminder = alertTimerModule.showTimerReminder;
+        window.initializeAlertTimer = alertTimerModule.initializeAlertTimer;
+
+        // Expose alert name functions
+        window.setCurrentAlertName = shipAssignmentModule.setCurrentAlertName;
+        window.getCurrentAlertName = shipAssignmentModule.getCurrentAlertName;
+        window.getAlertStartTime = shipAssignmentModule.getAlertStartTime;
+        window.clearCurrentAlertName = shipAssignmentModule.clearCurrentAlertName;
+
+        // Do NOT load ship assignments on startup - start fresh each session
+        // shipAssignmentModule.loadShipAssignments();
         shipAssignmentModule.renderShips();
         shipAssignmentModule.updatePreview();
 
         // Initialize AAR form
         aarModule.initializeAARForm();
 
-        console.log('Ship Assignment and AAR modules initialized successfully');
+        // Initialize Alert Timer
+        alertTimerModule.initializeAlertTimer();
+
+        console.log('Ship Assignment, AAR, and Alert Timer modules initialized successfully');
     } catch (error) {
         console.error('Failed to initialize Ship Assignment and AAR modules:', error);
     }

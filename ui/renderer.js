@@ -395,6 +395,15 @@ function copyAlertToClipboard() {
 	}
 }
 
+function copyRTBToClipboard() {
+	const text = '<:RTB1:1182246669564256296><:RTB2:1182246670717689867><:RTB3:1182246674383507476><:RTB4:1182246677101412392><:RTB5:1182246678397464596><:RTB6:1182246679680929803><:RTB7:1182246686177894430><:RTB8:1182246689336213575><t:1767739810:R>';
+	if (navigator.clipboard && navigator.clipboard.writeText && document.hasFocus()) {
+		navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+	} else {
+		fallbackCopy(text);
+	}
+}
+
 function applyTranslations() {
 	// Set document language for accessibility
 	const lang = getLang();
@@ -622,9 +631,11 @@ function initializeDOMElements() {
 		CUSTOM_ALERT_SOUND: document.getElementById('alert-sound'),
 		CUSTOM_CHATMESSAGE_SOUND: document.getElementById('chat-sound'),
 		CUSTOM_TEAMJOIN_SOUND: document.getElementById('team-sound'),
+		CUSTOM_UNASSIGNED_SOUND: document.getElementById('unassigned-sound'),
 		ENABLE_CUSTOM_ALERT_SOUND: document.getElementById('enable-alert-sound'),
 		ENABLE_CUSTOM_CHATMESSAGE_SOUND: document.getElementById('enable-chat-message-sound'),
 		ENABLE_CUSTOM_TEAMJOIN_SOUND: document.getElementById('enable-team-sound'),
+		ENABLE_CUSTOM_UNASSIGNED_SOUND: document.getElementById('enable-unassigned-sound'),
 		ENABLE_PRINT_SHIPASSIGNMENTS: document.getElementById('enable-ship-assignments'),
 		ENABLE_PRINT_TEAMJOINORDER: document.getElementById('enable-team-order'),
 		ENABLE_ALERT_OVERLAY: document.getElementById('enable-overlay'),
@@ -711,6 +722,38 @@ function initializeDOMElements() {
 		});
 	}
 
+	// Alert Workflow actions
+	const awRunAlertBtn = document.getElementById('alert-workflow-run-alert');
+	if (awRunAlertBtn) {
+		awRunAlertBtn.addEventListener('click', async () => {
+			try {
+				awRunAlertBtn.disabled = true;
+				const originalText = awRunAlertBtn.textContent;
+				awRunAlertBtn.textContent = t('alert_test_running');
+				const result = await window.api.testAlertFull();
+				awRunAlertBtn.textContent = originalText;
+				addLog(getLang()==='en'?`Alert Workflow: Alert test ${result.success?'started':'failed'}`:`Alert Workflow: Alert-Test ${result.success?'gestartet':'fehlgeschlagen'}`,
+					!result.success);
+			} catch (error) {
+				addLog(getLang()==='en'?`Alert Workflow: error ${error.message}`:`Alert Workflow: Fehler ${error.message}`,
+					true);
+			} finally {
+				awRunAlertBtn.disabled = false;
+			}
+		});
+	}
+
+	const awCopyAlertBtn = document.getElementById('alert-workflow-copy-alert');
+	if (awCopyAlertBtn) {
+		awCopyAlertBtn.addEventListener('click', copyAlertToClipboard);
+	}
+
+	const awCopyRTBBtn = document.getElementById('alert-workflow-copy-rtb');
+	if (awCopyRTBBtn) {
+		awCopyRTBBtn.addEventListener('click', copyRTBToClipboard);
+	}
+
+
 	// File selection buttons
 	document.querySelectorAll('[data-select]').forEach(button => {
 		button.addEventListener('click', async () => {
@@ -745,6 +788,12 @@ function initializeDOMElements() {
 	const header = document.querySelector('header');
 	if (header) {
 		header.classList.add('stopped');
+	}
+
+	// Header RTB copy button
+	const rtbCopyHeadBtn = document.getElementById('rtb-copy-head');
+	if (rtbCopyHeadBtn) {
+		rtbCopyHeadBtn.addEventListener('click', copyRTBToClipboard);
 	}
 
 	if (positionDisplay) {
@@ -1196,6 +1245,65 @@ window.api.onTeamMembersUpdate((members) => {
 	displayTeamMembers(members);
 });
 
+// Listen to alert started events
+window.api.onAlertStarted((alertData) => {
+	if (alertData && alertData.name) {
+		// Track in session set and update AAR dropdown
+		if (typeof sessionAlerts !== 'undefined') {
+			sessionAlerts.add(alertData.name);
+		}
+		updateAARAlertDropdown();
+		if (window.setCurrentAlertName) {
+			window.setCurrentAlertName(alertData.name);
+		}
+		console.log("[renderer] Alert started:", alertData.name);
+	}
+});
+
+// Session alerts tracking and AAR dropdown population
+const sessionAlerts = new Set();
+function updateAARAlertDropdown() {
+	const sel = document.getElementById('aar-alert-dropdown');
+	if (!sel) return;
+	const currentValue = sel.value;
+	// Clear options
+	while (sel.firstChild) sel.removeChild(sel.firstChild);
+	// Placeholder
+	const placeholder = document.createElement('option');
+	placeholder.value = '';
+	placeholder.textContent = 'Alert auswählen...';
+	sel.appendChild(placeholder);
+	// Add sorted alerts
+	const alerts = Array.from(sessionAlerts).sort((a, b) => a.localeCompare(b));
+	for (const name of alerts) {
+		const opt = document.createElement('option');
+		opt.value = name;
+		opt.textContent = name;
+		sel.appendChild(opt);
+	}
+	// Restore selection if still present
+	if (currentValue && sessionAlerts.has(currentValue)) {
+		sel.value = currentValue;
+	} else {
+		sel.value = '';
+	}
+}
+
+// Wire dropdown change to set current alert (no impact on copies)
+document.addEventListener('DOMContentLoaded', () => {
+	const sel = document.getElementById('aar-alert-dropdown');
+	if (sel) {
+		sel.addEventListener('change', () => {
+			const val = sel.value || null;
+			if (val && window.setCurrentAlertName) {
+				window.setCurrentAlertName(val);
+			}
+		});
+		// Ensure initial placeholder
+		updateAARAlertDropdown();
+	}
+});
+
 // Listen to assistant events
 window.api.onAssistantLog((message) => {
 	addLog(message, false);
@@ -1251,6 +1359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 	await loadTeamMembers();
 	await loadShipAndAARModules(); // Load ship assignment and AAR modules
 	loadManualPositionFromStorage();
+	initializeWorkflow(); // Initialize workflow display
 
 	// Re-apply translations when language changes
 	const langSelect = document.getElementById('language');
@@ -1260,6 +1369,182 @@ document.addEventListener('DOMContentLoaded', async () => {
 			updateAssistantStatus(isAssistantRunning);
 		});
 	}
+});
+
+// ============================================================================
+// WORKFLOW MANAGEMENT
+// ============================================================================
+
+let currentWorkflow = null;
+let currentWorkflowPageIndex = 0;
+
+function initializeWorkflow() {
+	// Load workflow from localStorage
+	loadWorkflow();
+	renderWorkflow();
+	
+	// Setup builder button
+	const openBuilderBtn = document.getElementById('open-builder-btn');
+	if (openBuilderBtn) {
+		openBuilderBtn.onclick = async () => {
+			const result = await window.api.openWorkflowBuilder();
+			if (!result.success) {
+				console.error('Failed to open workflow builder');
+			}
+		};
+	}
+	
+	// Setup navigation
+	const prevBtn = document.getElementById('workflow-prev-btn');
+	const nextBtn = document.getElementById('workflow-next-btn');
+	
+	if (prevBtn) {
+		prevBtn.onclick = () => {
+			if (currentWorkflowPageIndex > 0) {
+				currentWorkflowPageIndex--;
+				renderWorkflow();
+			}
+		};
+	}
+	
+	if (nextBtn) {
+		nextBtn.onclick = () => {
+			if (currentWorkflow && currentWorkflowPageIndex < currentWorkflow.pages.length - 1) {
+				currentWorkflowPageIndex++;
+				renderWorkflow();
+			}
+		};
+	}
+}
+
+function loadWorkflow() {
+	try {
+		const stored = localStorage.getItem('mrs_alert_workflow');
+		if (stored) {
+			currentWorkflow = JSON.parse(stored);
+			currentWorkflowPageIndex = 0;
+			console.log('[Workflow] Loaded:', currentWorkflow.name);
+		}
+	} catch (e) {
+		console.error('[Workflow] Failed to load:', e);
+	}
+}
+
+function renderWorkflow() {
+	const buttonsContainer = document.getElementById('workflow-buttons-container');
+	const pageNumber = document.getElementById('workflow-page-number');
+	const pageIndicator = document.getElementById('workflow-page-indicator');
+	const navigation = document.getElementById('workflow-navigation');
+	const prevBtn = document.getElementById('workflow-prev-btn');
+	const nextBtn = document.getElementById('workflow-next-btn');
+	
+	if (!currentWorkflow || !currentWorkflow.pages || currentWorkflow.pages.length === 0) {
+		buttonsContainer.innerHTML = '<p style="text-align: center; color: #888; padding: 2rem;">Kein Workflow geladen. Öffne den Builder, um einen Workflow zu erstellen.</p>';
+		navigation.style.display = 'none';
+		return;
+	}
+	
+	const page = currentWorkflow.pages[currentWorkflowPageIndex];
+	if (!page) return;
+	
+	// Update page number
+	pageNumber.textContent = `Seite ${page.id}`;
+	pageIndicator.textContent = `${currentWorkflowPageIndex + 1} / ${currentWorkflow.pages.length}`;
+	
+	// Show/hide navigation
+	if (currentWorkflow.pages.length > 1) {
+		navigation.style.display = 'flex';
+		prevBtn.disabled = currentWorkflowPageIndex === 0;
+		nextBtn.disabled = currentWorkflowPageIndex === currentWorkflow.pages.length - 1;
+	} else {
+		navigation.style.display = 'none';
+	}
+	
+	// Render buttons
+	buttonsContainer.innerHTML = '';
+	
+	if (page.buttons.length === 0) {
+		buttonsContainer.innerHTML = '<p style="text-align: center; color: #888; padding: 2rem;">Keine Buttons auf dieser Seite. Öffne den Builder, um Buttons hinzuzufügen.</p>';
+		return;
+	}
+	
+	page.buttons.forEach(button => {
+		const btn = document.createElement('button');
+		btn.className = 'workflow-button';
+		btn.textContent = button.label;
+		btn.style.backgroundColor = button.color;
+		btn.onclick = () => executeWorkflowButton(button);
+		buttonsContainer.appendChild(btn);
+	});
+}
+
+async function executeWorkflowButton(button) {
+	if (!button || !button.actions) return;
+	
+	console.log('[Workflow] Executing button:', button.label);
+	
+	for (const action of button.actions) {
+		switch (action.type) {
+			case 'navigate':
+				if (action.targetPage && currentWorkflow) {
+					const targetIndex = currentWorkflow.pages.findIndex(p => p.id === action.targetPage);
+					if (targetIndex !== -1) {
+						currentWorkflowPageIndex = targetIndex;
+						renderWorkflow();
+					}
+				}
+				break;
+				
+			case 'copy':
+				if (action.text) {
+					try {
+						await navigator.clipboard.writeText(action.text);
+						console.log('[Workflow] Text copied');
+						// Could show a notification here
+					} catch (e) {
+						console.error('[Workflow] Copy failed:', e);
+						// Fallback
+						const textarea = document.createElement('textarea');
+						textarea.value = action.text;
+						document.body.appendChild(textarea);
+						textarea.select();
+						document.execCommand('copy');
+						document.body.removeChild(textarea);
+					}
+				}
+				break;
+				
+			case 'timer':
+				if (action.action) {
+					switch (action.action) {
+						case 'advance':
+							if (window.advanceAlertTimer) {
+								window.advanceAlertTimer();
+							}
+							break;
+						case 'reset':
+							if (window.resetAlertTimer) {
+								window.resetAlertTimer(false);
+							}
+							break;
+					}
+				}
+				break;
+				
+			case 'end':
+				console.log('[Workflow] Workflow ended');
+				currentWorkflowPageIndex = 0;
+				renderWorkflow();
+				break;
+		}
+	}
+}
+
+// Listen for workflow updates from builder
+window.api.onWorkflowUpdated((workflow) => {
+	console.log('[Workflow] Updated from builder');
+	currentWorkflow = workflow;
+	renderWorkflow();
 });
 
 // Global functions will be loaded from shipaar-init.js during DOMContentLoaded

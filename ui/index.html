@@ -22,6 +22,7 @@
                     <button id="copy-position-btn" style="padding: 6px 12px; font-size: 1rem; font-weight: bold; background-color: white; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">SB</button>
                 </div>
                 <button id="copy-alert-btn" title="Alert-Rundlicht kopieren" style="padding: 6px 12px; font-size: 1.2rem; background-color: #1a1a1a; color: #dc2626; border: 2px solid #dc2626; border-radius: 6px; cursor: pointer; transition: all 0.2s;">🚨</button>
+                <button id="rtb-copy-head" title="RTB kopieren" style="padding: 6px 12px; font-size: 1rem; font-weight: 700; background-color: #facc15; color: #000; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s;">RTB</button>
                 <div class="status-indicator" id="status-indicator">
                     <span class="status-dot" id="status-dot"></span>
                     <span id="status-text">Gestoppt</span>
@@ -34,11 +35,46 @@
             <button class="tab-btn active" data-tab="team" id="tab-btn-team" onclick="window.switchTab('team'); return false;">Team</button>
             <button class="tab-btn" data-tab="shipAssignment" id="tab-btn-shipAssignment" onclick="window.switchTab('shipAssignment'); return false;">Ship Assignments</button>
             <button class="tab-btn" data-tab="aar" id="tab-btn-aar" onclick="window.switchTab('aar'); return false;">After Action Report</button>
+            <button class="tab-btn" data-tab="alertWorkflow" id="tab-btn-alertWorkflow" onclick="window.switchTab('alertWorkflow'); return false;">Alert Workflow</button>
             <button class="tab-btn" data-tab="settings" id="tab-btn-settings" onclick="window.switchTab('settings'); return false;">Einstellungen</button>
             <button class="tab-btn" data-tab="console" style="display: none;" id="console-tab-btn" onclick="window.switchTab('console'); return false;">Konsole</button>
         </div>
 
         <main>
+            <!-- Alert Workflow Tab -->
+            <div class="tab-content" data-tab="alertWorkflow" style="display: none;">
+                <h2>Alert Workflow</h2>
+                <p class="description">
+                    Erstelle und führe visuelle Workflows mit Buttons und Aktionen für Alerts aus.
+                </p>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                        <h3>Workflow Steuerung</h3>
+                        <button id="open-builder-btn" class="btn btn-primary">
+                            <span style="margin-right: 0.5rem;">⚙️</span>
+                            Workflow Builder öffnen
+                        </button>
+                    </div>
+
+                    <!-- Workflow Display Area -->
+                    <div id="workflow-display" class="workflow-display">
+                        <div class="workflow-page" id="current-workflow-page">
+                            <div class="page-number-display" id="workflow-page-number">Seite 1</div>
+                            <div id="workflow-buttons-container" class="workflow-buttons">
+                                <p style="text-align: center; color: #888; padding: 2rem;">
+                                    Kein Workflow geladen. Öffne den Builder, um einen Workflow zu erstellen.
+                                </p>
+                            </div>
+                            <div class="workflow-nav" id="workflow-navigation" style="display: none;">
+                                <button id="workflow-prev-btn" class="btn btn-nav">←</button>
+                                <span id="workflow-page-indicator">1 / 1</span>
+                                <button id="workflow-next-btn" class="btn btn-nav">→</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Sounds Tab (hidden - moved to settings) -->
             <div class="tab-content" data-tab="sounds" style="display: none;">
                 <h2 id="sounds-title">Sound-Dateien</h2>
@@ -324,6 +360,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group">
+                            <label for="unassigned-sound" id="unassigned-sound-label">Unzugewiesenes Crew-Mitglied Sound</label>
+                            <div class="file-input-group">
+                                <input type="text" id="unassigned-sound" placeholder="./sounds/alert.wav">
+                                <button type="button" class="btn btn-secondary" data-select="unassigned-sound" id="browse-unassigned">Durchsuchen</button>
+                            </div>
+                        </div>
+
                         <div class="available-sounds" id="available-sounds">
                             <h3 id="available-sounds-title">Verfügbare Sounds im sounds/-Ordner:</h3>
                             <div class="sound-list" id="sound-list">
@@ -384,6 +428,20 @@
                                         <span class="slider"></span>
                                     </label>
                                     <button class="btn btn-test" data-test="team-join-sound">Test 3</button>
+                                </div>
+                            </div>
+
+                            <div class="feature-item">
+                                <div class="feature-info">
+                                    <h3 id="feature-unassigned-title">Custom Unassigned Crew Sound</h3>
+                                    <p id="feature-unassigned-desc">Spielt einen Sound wenn ein Crew-Mitglied noch nicht zugewiesen ist</p>
+                                </div>
+                                <div class="feature-controls">
+                                    <label class="switch">
+                                        <input type="checkbox" id="enable-unassigned-sound">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <button class="btn btn-test" data-test="unassigned-sound">Test 4</button>
                                 </div>
                             </div>
 
@@ -582,6 +640,7 @@
                         <input type="text" id="api-status" placeholder="Loading ships..." readonly style="flex: 1; min-width: 150px;">
                         <button class="btn btn-secondary" onclick="loadShips()">Refresh Ships</button>
                         <button class="btn btn-secondary" onclick="openImportModal()">Import from Discord</button>
+                        <button class="btn btn-primary" onclick="autoFillShipAssignments()">Auto-fill</button>
                         <button class="btn btn-danger" onclick="confirmClearShipAssignments()">Clear All</button>
                     </div>
 
@@ -613,6 +672,32 @@
                     <h3 style="margin-bottom: 1.5rem;">After Action Report</h3>
 
                     <form id="aar-form">
+                        <!-- Mission Timer Section -->
+                        <div style="margin-bottom: 2rem; padding: 1rem; background: #1a1a1a; border: 1px solid #444; border-radius: 0.5rem;">
+                            <h4 style="margin-bottom: 1rem; color: #4dabf7;">Mission Timer</h4>
+                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: space-between;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="font-size: 2.5rem; font-weight: bold; font-family: monospace; color: #fff; text-align: center;" id="alert-timer-display">00:00:00</div>
+                                    <div style="text-align: center; font-size: 0.9rem; color: #888; margin-top: 0.5rem;" id="alert-timer-stage">Ready</div>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                    <button type="button" class="btn btn-primary" id="alert-timer-button">Start Timer</button>
+                                    <button type="button" class="btn btn-secondary" id="alert-timer-reset">Reset</button>
+                                </div>
+                            </div>
+                            <div id="timer-reminder" style="display: none; margin-top: 1rem; padding: 0.75rem; background: #d97706; border-radius: 0.5rem; color: white; font-size: 0.9rem; text-align: center;">
+                                <span id="timer-reminder-text">Reminder message</span>
+                            </div>
+                        </div>
+
+                        <!-- Alert Selection Section -->
+                        <div style="margin-bottom: 1.5rem;">
+                            <h4 style="margin-bottom: 0.75rem; color: #4dabf7;">Alert</h4>
+                            <select id="aar-alert-dropdown" class="form-control" style="min-width: 240px;">
+                                <option value="">Alert auswählen...</option>
+                            </select>
+                        </div>
+
                         <!-- Ships Used Section -->
                         <div style="margin-bottom: 1.5rem;">
                             <h4 style="margin-bottom: 1rem; color: #4dabf7;">Ships Used</h4>

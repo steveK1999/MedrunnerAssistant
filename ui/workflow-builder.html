@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alert Workflow Builder</title>
+    <link rel="stylesheet" href="workflow-builder.css">
+</head>
+<body>
+    <div class="builder-container">
+        <!-- Header -->
+        <header class="builder-header">
+            <h1>Alert Workflow Builder</h1>
+            <div class="header-actions">
+                <input type="text" id="workflow-name" placeholder="Workflow-Name" class="workflow-name-input">
+                <button id="save-workflow-btn" class="btn btn-primary">Speichern</button>
+                <button id="close-builder-btn" class="btn btn-secondary">Schließen</button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="builder-main">
+            <!-- Sidebar - Page List -->
+            <aside class="page-sidebar">
+                <div class="sidebar-header">
+                    <h3>Seiten</h3>
+                    <button id="add-page-btn" class="btn btn-small" title="Seite hinzufügen">+</button>
+                </div>
+                <ul id="page-list" class="page-list">
+                    <!-- Pages will be added here -->
+                </ul>
+            </aside>
+
+            <!-- Editor - Current Page -->
+            <main class="page-editor">
+                <div class="page-header">
+                    <div class="page-number" id="page-number">Seite 1</div>
+                    <button id="delete-page-btn" class="btn btn-danger btn-small">Seite löschen</button>
+                </div>
+
+                <!-- Page Preview -->
+                <div class="page-preview" id="page-preview">
+                    <!-- Buttons will be displayed here -->
+                </div>
+
+                <!-- Navigation -->
+                <div class="page-navigation">
+                    <button id="prev-page-btn" class="btn btn-nav" title="Vorherige Seite">←</button>
+                    <span id="page-indicator">1 / 1</span>
+                    <button id="next-page-btn" class="btn btn-nav" title="Nächste Seite">→</button>
+                </div>
+
+                <!-- Add Button -->
+                <div class="add-button-section">
+                    <button id="add-button-btn" class="btn btn-primary">Button hinzufügen</button>
+                </div>
+            </main>
+
+            <!-- Properties Panel - Button Editor -->
+            <aside class="properties-panel" id="properties-panel">
+                <h3>Button bearbeiten</h3>
+                <div id="button-editor" class="button-editor">
+                    <p class="no-selection">Wähle einen Button zum Bearbeiten</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Button Editor Modal -->
+    <div id="button-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Button bearbeiten</h2>
+                <button class="close-modal" id="close-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="button-label">Button Text:</label>
+                    <input type="text" id="button-label" class="form-control" placeholder="Button Text">
+                </div>
+
+                <div class="form-group">
+                    <label for="button-color">Button Farbe:</label>
+                    <div class="color-picker-group">
+                        <input type="color" id="button-color" class="color-input" value="#3b82f6">
+                        <input type="text" id="button-color-hex" class="form-control" value="#3b82f6" style="width: 100px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Aktionen:</label>
+                    <div class="actions-list" id="actions-list">
+                        <!-- Actions will be added here -->
+                    </div>
+                    <button id="add-action-btn" class="btn btn-small">Aktion hinzufügen</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-button-btn" class="btn btn-primary">Speichern</button>
+                <button id="cancel-button-btn" class="btn btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Editor Modal -->
+    <div id="action-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h2>Aktion hinzufügen</h2>
+                <button class="close-modal" id="close-action-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="action-type">Aktionstyp:</label>
+                    <select id="action-type" class="form-control">
+                        <option value="">Bitte wählen...</option>
+                        <option value="navigate">Weiter zu Seite</option>
+                        <option value="copy">Text kopieren</option>
+                        <option value="timer">Timer ändern</option>
+                        <option value="end">Workflow beenden</option>
+                    </select>
+                </div>
+
+                <!-- Navigate Options -->
+                <div class="form-group" id="navigate-options" style="display: none;">
+                    <label for="target-page">Ziel-Seite:</label>
+                    <select id="target-page" class="form-control">
+                        <!-- Pages will be populated -->
+                    </select>
+                </div>
+
+                <!-- Copy Options -->
+                <div class="form-group" id="copy-options" style="display: none;">
+                    <label for="copy-text">Text zum Kopieren:</label>
+                    <textarea id="copy-text" class="form-control" rows="3" placeholder="Text eingeben..."></textarea>
+                </div>
+
+                <!-- Timer Options -->
+                <div class="form-group" id="timer-options" style="display: none;">
+                    <label for="timer-action">Timer Aktion:</label>
+                    <select id="timer-action" class="form-control">
+                        <option value="advance">Timer fortsetzen</option>
+                        <option value="reset">Timer zurücksetzen</option>
+                    </select>
+                </div>
+
+                <!-- End Options (no options needed) -->
+                <div class="form-group" id="end-options" style="display: none;">
+                    <p>Beendet den Workflow und kehrt zur ersten Seite zurück.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="save-action-btn" class="btn btn-primary">Hinzufügen</button>
+                <button id="cancel-action-btn" class="btn btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="workflow-builder.js"></script>
+</body>
+</html>
