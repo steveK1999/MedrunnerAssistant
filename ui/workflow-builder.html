@@ -10,17 +10,17 @@
     <div class="builder-container">
         <!-- Header -->
         <header class="builder-header">
-            <h1>Workflow Builder</h1>
+            <h1 id="builder-title">Workflow Builder</h1>
             <div class="header-actions">
-                <button id="workflows-list-btn" class="btn btn-info" title="Alle Workflows anzeigen">📋 Workflows</button>
+                <button id="workflows-list-btn" class="btn btn-info" title="Alle Workflows anzeigen">📋 <span id="workflows-btn-text">Workflows</span></button>
                 <input type="text" id="workflow-name" placeholder="Workflow-Name" class="workflow-name-input">
                 <label class="checkbox-label" style="margin-left: 1rem; color: #fff;">
                     <input type="checkbox" id="workflow-enabled" checked>
-                    Aktiviert
+                    <span id="workflow-enabled-text">Aktiviert</span>
                 </label>
-                <button id="test-workflow-btn" class="btn btn-warning" style="display: none;" title="Workflow testen">🧪 Test</button>
-                <button id="save-workflow-btn" class="btn btn-primary">Speichern</button>
-                <button id="close-builder-btn" class="btn btn-secondary">Schließen</button>
+                <button id="test-workflow-btn" class="btn btn-warning" style="display: none;" title="Workflow testen">🧪 <span id="test-btn-text">Test</span></button>
+                <button id="save-workflow-btn" class="btn btn-primary"><span id="save-workflow-text">Speichern</span></button>
+                <button id="close-builder-btn" class="btn btn-secondary"><span id="close-builder-text">Schließen</span></button>
             </div>
         </header>
 
@@ -135,7 +135,7 @@
             <main class="page-editor">
                 <div class="page-header">
                     <div class="page-number" id="page-number">Seite 1</div>
-                    <button id="delete-page-btn" class="btn btn-danger btn-small">Seite löschen</button>
+                    <button id="delete-page-btn" class="btn btn-danger btn-small"><span id="delete-page-text">Seite löschen</span></button>
                 </div>
 
                 <!-- Page Preview -->
@@ -152,7 +152,7 @@
 
                 <!-- Add Button -->
                 <div class="add-button-section">
-                    <button id="add-button-btn" class="btn btn-primary">Button hinzufügen</button>
+                    <button id="add-button-btn" class="btn btn-primary"><span id="add-button-text">Button hinzufügen</span></button>
                 </div>
             </main>
 
@@ -160,7 +160,7 @@
             <aside class="properties-panel" id="properties-panel">
                 <h3>Button bearbeiten</h3>
                 <div id="button-editor" class="button-editor">
-                    <p class="no-selection">Wähle einen Button zum Bearbeiten</p>
+                    <p class="no-selection"><span id="no-selection-text">Wähle einen Button zum Bearbeiten</span></p>
                 </div>
             </aside>
         </div>
@@ -170,7 +170,7 @@
     <div id="button-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modal-title">Button bearbeiten</h2>
+                <h2 id="modal-title"><span id="modal-button-edit-title">Button bearbeiten</span></h2>
                 <button class="close-modal" id="close-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
@@ -192,12 +192,12 @@
                     <div class="actions-list" id="actions-list">
                         <!-- Actions will be added here -->
                     </div>
-                    <button id="add-action-btn" class="btn btn-small">Aktion hinzufügen</button>
+                    <button id="add-action-btn" class="btn btn-small"><span id="add-action-text">Aktion hinzufügen</span></button>
                 </div>
             </div>
             <div class="modal-footer">
                 <button id="save-button-btn" class="btn btn-primary">Speichern</button>
-                <button id="cancel-button-btn" class="btn btn-secondary">Abbrechen</button>
+                <button id="cancel-button-btn" class="btn btn-secondary"><span id="cancel-button-text">Abbrechen</span></button>
             </div>
         </div>
     </div>
@@ -206,7 +206,7 @@
     <div id="action-modal" class="modal" style="display: none;">
         <div class="modal-content modal-small">
             <div class="modal-header">
-                <h2>Aktion hinzufügen</h2>
+                <h2 id="add-action-modal-title"><span id="add-action-title">Aktion hinzufügen</span></h2>
                 <button class="close-modal" id="close-action-modal-btn">&times;</button>
             </div>
             <div class="modal-body">
@@ -250,7 +250,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="save-action-btn" class="btn btn-primary">Hinzufügen</button>
+                <button id="save-action-btn" class="btn btn-primary"><span id="save-action-text">Hinzufügen</span></button>
                 <button id="cancel-action-btn" class="btn btn-secondary">Abbrechen</button>
             </div>
         </div>

@@ -159,7 +159,16 @@ const translations = {
 		dev_api_key_label: 'Dev API Key',
 		alert_test_title: 'Alert Test Full',
 		alert_test_desc: 'Spielt Alert-Sound und zeigt Overlay gem�� Monitor-Auswahl.',
-		alert_test_run_btn: 'Alert-Test ausf�hren',
+				alert_test_run_btn: 'Alert-Test ausführen',
+		workflow_title: 'Workflow',
+		workflow_desc: 'Erstelle und führe visuelle Workflows mit Buttons und Aktionen aus, die durch Events ausgelöst werden.',
+		workflow_my_workflows: 'Meine Workflows',
+		workflow_builder_open: 'Workflow Builder öffnen',
+		workflow_empty: 'Keine Workflows vorhanden. Öffne den Builder, um einen Workflow zu erstellen.',
+		workflow_enabled: 'Aktiviert',
+		workflow_disable: 'Deaktivieren',
+		workflow_delete: 'Löschen',
+		workflow_test: 'Test',
 	},
 	en: {
 		header_title: 'Medrunner Assistant',
@@ -244,6 +253,15 @@ const translations = {
 		alert_test_title: 'Alert Test Full',
 		alert_test_desc: 'Plays alert sound and shows overlay according to monitor selection.',
 		alert_test_run_btn: 'Run Alert Test',
+		workflow_title: 'Workflow',
+		workflow_desc: 'Create and run visual workflows with buttons and actions that are triggered by events.',
+		workflow_my_workflows: 'My Workflows',
+		workflow_builder_open: 'Open Workflow Builder',
+		workflow_empty: 'No workflows available. Open the builder to create a workflow.',
+		workflow_enabled: 'Enabled',
+		workflow_disable: 'Disable',
+		workflow_delete: 'Delete',
+		workflow_test: 'Test',
 		more_settings_title: 'More Settings',
 		// Tooltips
 		tooltip_browse: 'Select WAV file',
@@ -425,6 +443,29 @@ function applyTranslations() {
 		const el = document.getElementById(id);
 		if (el) el.textContent = t(key);
 	});
+
+	// Workflow tab translations
+	const workflowTitle = document.getElementById('workflow-title');
+	if (workflowTitle) workflowTitle.textContent = t('workflow_title');
+	const workflowDesc = document.getElementById('workflow-desc');
+	if (workflowDesc) workflowDesc.textContent = t('workflow_desc');
+	const workflowMyWorkflows = document.getElementById('workflow-my-workflows');
+	if (workflowMyWorkflows) workflowMyWorkflows.textContent = t('workflow_my_workflows');
+	const workflowBuilderOpen = document.getElementById('workflow-builder-open');
+	if (workflowBuilderOpen) workflowBuilderOpen.textContent = t('workflow_builder_open');
+	const workflowEmpty = document.getElementById('workflow-empty');
+	if (workflowEmpty) workflowEmpty.textContent = t('workflow_empty');
+
+	// Settings tab translations
+	const settingsTitle = document.getElementById('settings-title');
+	if (settingsTitle) settingsTitle.textContent = t('settings_title');
+	const saveBtnText = document.getElementById('save-btn-settings-text');
+	if (saveBtnText) saveBtnText.textContent = getLang() === 'en' ? 'Save' : 'Speichern';
+	const toggleTokenBtnNew = document.getElementById('toggle-token');
+	if (toggleTokenBtnNew) toggleTokenBtnNew.title = t('toggle_token_title');
+	const moreSettingsTitle = document.getElementById('more-settings-title');
+	if (moreSettingsTitle) moreSettingsTitle.textContent = t('more_settings_title');
+
 	// Console title/desc
 	const consoleTitle = document.getElementById('console-title');
 	if (consoleTitle) consoleTitle.textContent = t('tab_console');
@@ -436,7 +477,7 @@ function applyTranslations() {
 	const saveBtnEl = document.getElementById('save-btn-settings');
 	if (saveBtnEl) {
 		const lang = getLang();
-		saveBtnEl.textContent = lang === 'en' ? '💾 Speichern' : '💾 Speichern';
+		saveBtnEl.textContent = lang === 'en' ? '💾 Save' : '💾 Speichern';
 	}
 	// Clear logs button
 	const clearLogsEl = document.getElementById('clear-logs');
@@ -551,8 +592,6 @@ function applyTranslations() {
 	if (teamDesc) teamDesc.textContent = t('team_desc');
 
 	// Settings tab
-	const settingsTitle = document.getElementById('settings-title');
-	if (settingsTitle) settingsTitle.textContent = t('settings_title');
 	const languageLabel = document.getElementById('language-label');
 	if (languageLabel) languageLabel.textContent = t('language_label');
 	const medTokenLabel = document.getElementById('medrunner-token-label');
@@ -596,8 +635,6 @@ function applyTranslations() {
 		alertTestBtn.textContent = t('alert_test_run_btn');
 		alertTestBtn.title = t('tooltip_alert_test');
 	}
-	const moreSettingsTitle = document.getElementById('more-settings-title');
-	if (moreSettingsTitle) moreSettingsTitle.textContent = t('more_settings_title');
 }
 
 // Initialize DOM Elements and setup event listeners
@@ -1521,9 +1558,10 @@ function renderWorkflowsList() {
 			
 			const status = document.createElement('div');
 			status.className = `workflow-item-status ${workflow.enabled ? 'enabled' : 'disabled'}`;
+			const lang = getLang();
 			const statusText = lang === 'en'
 				? (workflow.enabled ? '✓ Enabled' : '✗ Disabled')
-				: (workflow.enabled ? '✓ Aktiviert' : '✗ Deaktiviert');
+				: (workflow.enabled ? '✓ ' + t('workflow_enabled') : '✗ ' + t('workflow_disable'));
 			status.innerHTML = `<span>${statusText}</span>`;
 			info.appendChild(status);
 			
@@ -1538,7 +1576,7 @@ function renderWorkflowsList() {
 			toggleBtn.className = 'workflow-toggle-btn';
 			toggleBtn.textContent = lang === 'en'
 				? (workflow.enabled ? 'Disable' : 'Enable')
-				: (workflow.enabled ? 'Deaktivieren' : 'Aktivieren');
+				: (workflow.enabled ? t('workflow_disable') : t('workflow_enabled'));
 			toggleBtn.onclick = (e) => {
 				e.stopPropagation();
 				toggleWorkflowEnabled(workflow.id, !workflow.enabled);
@@ -1569,7 +1607,7 @@ function renderWorkflowsList() {
 			// Delete button
 			const deleteBtn = document.createElement('button');
 			deleteBtn.className = 'workflow-delete-btn';
-			deleteBtn.textContent = lang === 'en' ? '🗑️ Delete' : '🗑️ Löschen';
+			deleteBtn.textContent = '🗑️ ' + t('workflow_delete');
 			deleteBtn.onclick = (e) => {
 				e.stopPropagation();
 				deleteWorkflowFromList(workflow.id);
@@ -1617,7 +1655,7 @@ function toggleWorkflowEnabled(workflowId, enabled) {
 
 function deleteWorkflowFromList(workflowId) {
 	const lang = getUILanguage();
-	const confirmMsg = lang === 'en' ? 'Really delete this workflow?' : 'Workflow wirklich löschen?';
+	const confirmMsg = t('confirm_delete_workflow');
 	if (!confirm(confirmMsg)) return;
 	
 	try {

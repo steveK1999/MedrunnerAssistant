@@ -43,23 +43,23 @@
         <main>
             <!-- Workflow Tab -->
             <div class="tab-content" data-tab="workflow" style="display: none;">
-                <h2>Workflow</h2>
-                <p class="description">
+                <h2 id="workflow-title">Workflow</h2>
+                <p class="description" id="workflow-desc">
                     Erstelle und führe visuelle Workflows mit Buttons und Aktionen aus, die durch Events ausgelöst werden.
                 </p>
 
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>Meine Workflows</h3>
+                        <h3 id="workflow-my-workflows">Meine Workflows</h3>
                         <button id="open-builder-btn" class="btn btn-primary">
                             <span style="margin-right: 0.5rem;">⚙️</span>
-                            Workflow Builder öffnen
+                            <span id="workflow-builder-open">Workflow Builder öffnen</span>
                         </button>
                     </div>
 
                     <!-- Workflows List -->
                     <div id="workflows-list-container" class="workflows-list">
-                        <p style="text-align: center; color: #888; padding: 2rem;">
+                        <p style="text-align: center; color: #888; padding: 2rem;" id="workflow-empty">
                             Keine Workflows vorhanden. Öffne den Builder, um einen Workflow zu erstellen.
                         </p>
                     </div>
@@ -283,7 +283,7 @@
             <div class="tab-content" data-tab="settings">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                     <h2 id="settings-title" style="margin: 0;">Einstellungen</h2>
-                    <button class="btn btn-success" id="save-btn-settings">💾 Speichern</button>
+                    <button class="btn btn-success" id="save-btn-settings"><span style="margin-right: 0.5rem;">💾</span><span id="save-btn-settings-text">Speichern</span></button>
                 </div>
 
                 <!-- Language & Token Settings (Top Section) -->
@@ -313,7 +313,7 @@
                 <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
 
                 <!-- More Settings Section Header -->
-                <h3 id="more-settings-title" style="margin: 1.5rem 0 1rem 0; padding: 0; font-size: 1.1em; color: var(--text);">Erweiterte Einstellungen</h3>
+                <h3 id="more-settings-title" style="margin: 1.5rem 0 1rem 0; padding: 0; font-size: 1.1em; color: var(--text);">More Settings</h3>
 
                 <!-- Sound-Dateien Accordion -->
                 <details class="accordion">
@@ -602,12 +602,12 @@
             <div class="tab-content" data-tab="console">
                 <h2 id="console-title">Konsolen-Ausgabe</h2>
                 <p class="description">
-                    <span id="console-desc">Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.</span>
+                    <span id="console-desc" data-i18n-de="Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist." data-i18n-en="Real-time logs from the running assistant. This tab is visible when Debug Mode is enabled.">Echtzeit-Logs vom laufenden Assistenten. Dieser Tab ist sichtbar, wenn der Debug-Modus aktiviert ist.</span>
                 </p>
                 <div class="log-output" id="log-output">
                     <p class="muted" id="logs-empty-msg">Keine Logs verfügbar. Starte den Assistant, um Logs zu sehen.</p>
                 </div>
-                <button type="button" class="btn btn-secondary" id="clear-logs">Logs löschen</button>
+                <button type="button" class="btn btn-secondary" id="clear-logs"id="clear-logs-text"id="clear-logs-text">Logs löschen</button>
             </div>
 
             <!-- Ship Assignment Tab -->

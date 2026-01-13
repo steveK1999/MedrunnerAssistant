@@ -9,10 +9,12 @@ const { ipcRenderer } = require('electron');
 const translations = {
     de: {
         title: 'Workflow Builder',
+        workflows: 'Workflows',
         workflowName: 'Workflow-Name',
         enabled: 'Aktiviert',
         save: 'Speichern',
         close: 'Schließen',
+        test: 'Test',
         workflowTrigger: 'Workflow Trigger',
         triggerType: 'Trigger-Typ:',
         teamJoin: 'Person möchte Team beitreten',
@@ -86,10 +88,12 @@ const translations = {
     },
     en: {
         title: 'Workflow Builder',
+        workflows: 'Workflows',
         workflowName: 'Workflow Name',
         enabled: 'Enabled',
         save: 'Save',
         close: 'Close',
+        test: 'Test',
         workflowTrigger: 'Workflow Trigger',
         triggerType: 'Trigger Type:',
         teamJoin: 'Person Requesting to Join Team',
@@ -500,10 +504,10 @@ function loadWorkflowsList() {
         
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn btn-danger btn-small';
-        deleteBtn.textContent = currentLang === 'en' ? 'Delete' : 'Löschen';
+        deleteBtn.textContent = t('delete');
         deleteBtn.onclick = (e) => {
             e.stopPropagation();
-            if (confirm(currentLang === 'en' ? 'Delete this workflow?' : 'Diesen Workflow wirklich löschen?')) {
+            if (confirm(t('confirm_delete_workflow'))) {
                 deleteWorkflowFromList(workflow.id);
                 if (currentWorkflowId === workflow.id) {
                     const remaining = getAllWorkflows();
@@ -1194,28 +1198,32 @@ function applyTranslations() {
     
     // Title
     document.title = t('title');
-    document.querySelector('h1').textContent = t('title');
+    const builderTitle = document.getElementById('builder-title');
+    if (builderTitle) builderTitle.textContent = t('title');
     
-    // Header
+    // Header - button text spans
+    const workflowsBtnText = document.getElementById('workflows-btn-text');
+    if (workflowsBtnText) workflowsBtnText.textContent = t('workflows');
+    
     const workflowsListBtn = document.getElementById('workflows-list-btn');
     if (workflowsListBtn) {
         workflowsListBtn.title = currentLang === 'en' ? 'Show all workflows' : 'Alle Workflows anzeigen';
     }
-    document.getElementById('workflow-name').placeholder = t('workflowName');
-    // Find the checkbox label and update its text content
-    const enabledLabel = document.querySelector('.checkbox-label');
-    if (enabledLabel && enabledLabel.querySelector('input#workflow-enabled')) {
-        // Update just the text node, not the checkbox
-        const textNode = Array.from(enabledLabel.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-        if (textNode) {
-            textNode.textContent = t('enabled');
-        } else {
-            // If no text node, add it after the checkbox
-            enabledLabel.appendChild(document.createTextNode(t('enabled')));
-        }
-    }
-    document.getElementById('save-workflow-btn').textContent = t('save');
-    document.getElementById('close-builder-btn').textContent = t('close');
+    
+    const workflowNameInput = document.getElementById('workflow-name');
+    if (workflowNameInput) workflowNameInput.placeholder = t('workflowName');
+    
+    const workflowEnabledText = document.getElementById('workflow-enabled-text');
+    if (workflowEnabledText) workflowEnabledText.textContent = t('enabled');
+    
+    const testBtnText = document.getElementById('test-btn-text');
+    if (testBtnText) testBtnText.textContent = t('test');
+    
+    const saveWorkflowText = document.getElementById('save-workflow-text');
+    if (saveWorkflowText) saveWorkflowText.textContent = t('save');
+    
+    const closeBuilderText = document.getElementById('close-builder-text');
+    if (closeBuilderText) closeBuilderText.textContent = t('close');
     
     // Test button
     const testBtn = document.getElementById('test-workflow-btn');
@@ -1320,26 +1328,38 @@ function applyTranslations() {
     document.getElementById('add-page-btn').title = t('addPage');
     
     // Page editor
-    document.getElementById('delete-page-btn').textContent = t('deletePage');
+    const deletePageText = document.getElementById('delete-page-text');
+    if (deletePageText) deletePageText.textContent = t('deletePage');
     document.getElementById('prev-page-btn').title = t('prevPage');
     document.getElementById('next-page-btn').title = t('nextPage');
-    document.getElementById('add-button-btn').textContent = t('addButton');
+    const addButtonText = document.getElementById('add-button-text');
+    if (addButtonText) addButtonText.textContent = t('addButton');
     
     // Properties panel
     document.querySelector('.properties-panel h3').textContent = t('editButton');
-    document.querySelector('.no-selection').textContent = t('selectButton');
+    const noSelectionText = document.getElementById('no-selection-text');
+    if (noSelectionText) noSelectionText.textContent = t('selectButton');
     
     // Button modal
+    const modalButtonEditTitle = document.getElementById('modal-button-edit-title');
+    if (modalButtonEditTitle) modalButtonEditTitle.textContent = t('editButton');
+    
     document.querySelector('label[for="button-label"]').textContent = t('buttonText');
     document.getElementById('button-label').placeholder = t('buttonText').replace(':', '');
     document.querySelector('label[for="button-color"]').textContent = t('buttonColor');
     document.querySelector('.modal-body label:nth-of-type(3)').textContent = t('actions');
-    document.getElementById('add-action-btn').textContent = t('addAction');
+    
+    const addActionText = document.getElementById('add-action-text');
+    if (addActionText) addActionText.textContent = t('addAction');
+    
     document.getElementById('save-button-btn').textContent = t('save');
-    document.getElementById('cancel-button-btn').textContent = t('cancel');
+    
+    const cancelButtonText = document.getElementById('cancel-button-text');
+    if (cancelButtonText) cancelButtonText.textContent = t('cancel');
     
     // Action modal
-    document.querySelector('#action-modal .modal-header h2').textContent = t('addAction');
+    const addActionTitle = document.getElementById('add-action-title');
+    if (addActionTitle) addActionTitle.textContent = t('addAction');
     document.querySelector('label[for="action-type"]').textContent = t('actionType');
     
     // Action type options
@@ -1365,7 +1385,8 @@ function applyTranslations() {
     document.querySelector('#end-options p').textContent = t('endNote');
     
     // Action modal buttons
-    document.getElementById('save-action-btn').textContent = t('add');
+    const saveActionText = document.getElementById('save-action-text');
+    if (saveActionText) saveActionText.textContent = t('add');
     document.getElementById('cancel-action-btn').textContent = t('cancel');
     
     // Workflows modal
