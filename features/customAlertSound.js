@@ -20,7 +20,37 @@ export async function callback(alert) {
 
 	// Check if workflow should handle this alert instead
 	if (workflowManager.shouldTriggerOnNewAlert(alert)) {
-		console.log("Alert handled by workflow - skipping default sound/overlay");
+		console.log("Alert handled by workflow");
+		
+		// Execute workflow actions (overlay, sound, etc.)
+		const workflow = workflowManager.loadWorkflow();
+		if (workflow && workflow.trigger && workflow.trigger.actions) {
+			const actions = workflow.trigger.actions;
+			
+			// Show overlay if enabled in workflow
+			if (actions.showOverlay && process.env.ENABLE_ALERT_OVERLAY === "true") {
+				const overlayColor = actions.overlayColor || '#ff0000';
+				const screenIndex = Number.parseInt(actions.overlayScreen ?? process.env.ALERT_OVERLAY_SCREEN ?? "0", 10);
+				const safeScreen = Number.isNaN(screenIndex) ? 0 : screenIndex;
+				
+				showAlertOverlay({ monitorIndex: safeScreen, durationMs: 3000, color: overlayColor }).catch((e) => {
+					console.error("Failed to show workflow overlay:", e);
+				});
+			}
+			
+			// Play sound if enabled in workflow
+			if (actions.playSound && actions.soundFile) {
+				try {
+					const audioPath = resolveAudioPath(actions.soundFile);
+					const durationMs = actions.soundDuration ? parseInt(actions.soundDuration, 10) : 0;
+					await playAudio(audioPath, durationMs);
+					console.log("Workflow sound played successfully");
+				} catch (e) {
+					console.error("Failed to play workflow sound:", e);
+				}
+			}
+		}
+		
 		workflowManager.triggerWorkflow('new_alert');
 		
 		// Forward alert info to UI even when workflow handles it

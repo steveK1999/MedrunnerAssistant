@@ -259,6 +259,18 @@ ipcMain.on("workflow-timer-action", (event, action) => {
 	}
 });
 
+ipcMain.on("test-workflow", (event, data) => {
+	console.log("[Electron] Testing workflow:", data.workflow.name);
+	
+	// Send test trigger to main window
+	if (mainWindow) {
+		mainWindow.webContents.send('test-workflow-trigger', {
+			workflow: data.workflow,
+			triggerType: data.triggerType
+		});
+	}
+});
+
 // App lifecycle
 app.whenReady().then(() => {
 	createWindow();

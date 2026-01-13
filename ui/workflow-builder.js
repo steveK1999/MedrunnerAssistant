@@ -80,7 +80,9 @@ const translations = {
         secondaryDisplay: 'Sekundärer Bildschirm',
         displayNote: 'Bildschirm auf dem das Workflow-Fenster erscheint (nur wenn Workflow Seiten hat)',
         overlayColor: 'Overlay-Farbe:',
-        overlayColorNote: 'Farbe des Alert-Overlays (Standard: Rot)'
+        overlayColorNote: 'Farbe des Alert-Overlays (Standard: Rot)',
+        testWorkflow: 'Workflow testen',
+        testWorkflowNote: 'Simuliert den Trigger dieses Workflows'
     },
     en: {
         title: 'Workflow Builder',
@@ -155,7 +157,9 @@ const translations = {
         secondaryDisplay: 'Secondary Display',
         displayNote: 'Display where the workflow window appears (only if workflow has pages)',
         overlayColor: 'Overlay Color:',
-        overlayColorNote: 'Color of the alert overlay (Default: Red)'
+        overlayColorNote: 'Color of the alert overlay (Default: Red)',
+        testWorkflow: 'Test Workflow',
+        testWorkflowNote: 'Simulates triggering this workflow'
     }
 };
 
@@ -865,6 +869,40 @@ function executeButton(button) {
     }`);
 }
 
+/**
+ * Test the workflow by simulating a trigger
+ */
+function testWorkflow() {
+    // Save workflow first
+    saveWorkflow();
+    
+    if (!currentWorkflow) {
+        alert(t('saveFailed'));
+        return;
+    }
+    
+    console.log('[Builder] Testing workflow:', currentWorkflow.name);
+    
+    try {
+        // Send test trigger event to main process
+        ipcRenderer.send('test-workflow', {
+            workflow: currentWorkflow,
+            triggerType: currentWorkflow.trigger.type
+        });
+        
+        const msg = currentLang === 'en' 
+            ? `Workflow "${currentWorkflow.name}" is being tested!\n\nTrigger: ${currentWorkflow.trigger.type}`
+            : `Workflow "${currentWorkflow.name}" wird getestet!\n\nTrigger: ${currentWorkflow.trigger.type}`;
+        alert(msg);
+    } catch (e) {
+        console.error('[Builder] Failed to test workflow:', e);
+        const errMsg = currentLang === 'en'
+            ? 'Error testing workflow: ' + e.message
+            : 'Fehler beim Testen des Workflows: ' + e.message;
+        alert(errMsg);
+    }
+}
+
 // Action Management
 function openActionEditor() {
     const modal = document.getElementById('action-modal');
@@ -1042,6 +1080,24 @@ function setupEventListeners() {
     
     // Header
     document.getElementById('save-workflow-btn').onclick = saveWorkflow;
+    
+    const testBtn = document.getElementById('test-workflow-btn');
+    if (testBtn) {
+        testBtn.onclick = testWorkflow;
+        // Show test button only if TEST_MODE is enabled
+        try {
+            const settings = localStorage.getItem('settings');
+            if (settings) {
+                const parsed = JSON.parse(settings);
+                if (parsed.TEST_MODE === true || parsed.TEST_MODE === 'true') {
+                    testBtn.style.display = 'block';
+                }
+            }
+        } catch (e) {
+            console.warn('Could not load TEST_MODE setting:', e);
+        }
+    }
+    
     document.getElementById('close-builder-btn').onclick = () => {
         if (confirm(t('saveChanges'))) {
             saveWorkflow();
@@ -1142,6 +1198,13 @@ function applyTranslations() {
     }
     document.getElementById('save-workflow-btn').textContent = t('save');
     document.getElementById('close-builder-btn').textContent = t('close');
+    
+    // Test button
+    const testBtn = document.getElementById('test-workflow-btn');
+    if (testBtn) {
+        testBtn.textContent = '🧪 ' + t('testWorkflow');
+        testBtn.title = t('testWorkflowNote');
+    }
     
     // Sidebar
     document.querySelector('.sidebar-header h3').textContent = t('workflowTrigger');

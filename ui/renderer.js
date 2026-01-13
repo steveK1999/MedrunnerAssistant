@@ -1333,6 +1333,31 @@ window.api.onMenuSave(() => {
 	saveSettings();
 });
 
+// Test workflow trigger from builder
+window.electronAPI?.on?.('test-workflow-trigger', (data) => {
+	console.log('[Renderer] Testing workflow:', data.workflow.name);
+	
+	// Import and use workflowManager to trigger the workflow
+	try {
+		// Store the test workflow temporarily
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem('mrs_workflows_list', JSON.stringify([data.workflow]));
+			localStorage.setItem('mrs_current_workflow_id', data.workflow.id);
+		}
+		
+		// Trigger the workflow through workflowManager
+		// This will handle pages, overlays, sounds, etc. properly
+		if (window.workflowManager && window.workflowManager.triggerWorkflow) {
+			window.workflowManager.triggerWorkflow(data.triggerType);
+			alert(`Workflow "${data.workflow.name}" wird getestet!`);
+		} else {
+			console.warn('[Renderer] workflowManager not available for test');
+		}
+	} catch (e) {
+		console.error('[Renderer] Failed to test workflow:', e);
+	}
+});
+
 // React to TEST_MODE toggle
 document.addEventListener('change', (e) => {
 	if (e.target && e.target.id === 'test-mode') {
