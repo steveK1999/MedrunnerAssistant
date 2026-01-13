@@ -50,13 +50,13 @@ try {
 
 	// Test basic connection by fetching status
 	console.log('Testing API connection...');
-	const response = await api.getCurrentUser();
+	const response = await api.client.get();
 	
 	if (response && response.data) {
 		console.log('✅ API connection successful!\n');
 		console.log('User Data:');
-		console.log(`  Handle: ${response.data.handle}`);
-		console.log(`  Avatar: ${response.data.avatar?.small || 'N/A'}`);
+		console.log(`  RSI Handle: ${response.data.rsiHandle}`);
+		console.log(`  ID: ${response.data.id}`);
 		console.log(`\n✅ All tests passed!`);
 		process.exit(0);
 	} else {
