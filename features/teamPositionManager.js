@@ -1,4 +1,5 @@
 import { getSelf, getApi } from "../lib/medrunnerAPI.js";
+import * as workflowManager from "../lib/workflowManager.js";
 
 export const event = "TeamCreate|TeamUpdate|TeamDelete|EmergencyCreate|PersonUpdate";
 
@@ -30,6 +31,9 @@ export async function setup() {
 				teamCount: teamCount
 			});
 		}
+
+		// Send position to workflow manager
+		workflowManager.setPosition(currentPosition);
 	} catch (error) {
 		console.error("[TeamPositionManager] Failed to initialize:", error.message);
 	}
@@ -124,6 +128,9 @@ export async function getTeamPositionFromAPI() {
 						teamCount: teamCount
 					});
 				}
+
+				// Send position to workflow manager
+				workflowManager.setPosition(position);
 				
 				return position;
 			}
@@ -160,9 +167,10 @@ export async function setTeamPosition(newPosition) {
 		// Validate position is within bounds
 		let validPosition = newPosition;
 		if (validPosition < 1) {
-			validPosition = teamCount; // Wrap to last
+			validPosition = 1; // Minimum position
 		} else if (validPosition > teamCount) {
-			validPosition = 1; // Wrap to first
+			validPosition = teamCount; // Maximum position
+			console.warn(`[TeamPositionManager] Position ${newPosition} exceeds team count ${teamCount}, clamped to ${teamCount}`);
 		}
 		
 		currentPosition = validPosition;
@@ -176,6 +184,9 @@ export async function setTeamPosition(newPosition) {
 				teamCount: teamCount
 			});
 		}
+
+		// Send position to workflow manager
+		workflowManager.setPosition(validPosition);
 		
 		// TODO: Implement API call to update team order if endpoint is available
 		// This depends on actual API structure for updating team order

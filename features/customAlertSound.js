@@ -1,6 +1,7 @@
 import { playAudio } from "../lib/playAudio.js";
 import { showAlertOverlay } from "../lib/showAlertOverlay.js";
 import { resolveAudioPath } from "../lib/resolveAudioPath.js";
+import * as workflowManager from "../lib/workflowManager.js";
 
 export const event = "EmergencyCreate";
 
@@ -17,6 +18,33 @@ export async function callback(alert) {
 		return;
 	}
 
+	// Check if workflow should handle this alert instead
+	if (workflowManager.shouldTriggerOnNewAlert(alert)) {
+		console.log("Alert handled by workflow - skipping default sound/overlay");
+		workflowManager.triggerWorkflow('new_alert');
+		
+		// Forward alert info to UI even when workflow handles it
+		try {
+			if (typeof process !== "undefined" && typeof process.send === "function") {
+				process.send({
+					type: "alert-started",
+					data: {
+						name: alert.missionName || alert.name || "Unknown Alert",
+						timestamp: Date.now(),
+						alertId: alert.id || null,
+						location: alert.location || null,
+						workflowTriggered: true
+					}
+				});
+			}
+		} catch (e) {
+			console.error("Failed to forward alert to UI:", e);
+		}
+		
+		return; // Skip default sound/overlay
+	}
+
+	// Default behavior: play sound and show overlay
 	try {
 		const audioPath = resolveAudioPath(process.env.CUSTOM_ALERT_SOUND);
 		const durationMs = process.env.CUSTOM_ALERT_SOUND_DURATION_MS ? parseInt(process.env.CUSTOM_ALERT_SOUND_DURATION_MS, 10) : 0;

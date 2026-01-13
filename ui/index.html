@@ -35,17 +35,17 @@
             <button class="tab-btn active" data-tab="team" id="tab-btn-team" onclick="window.switchTab('team'); return false;">Team</button>
             <button class="tab-btn" data-tab="shipAssignment" id="tab-btn-shipAssignment" onclick="window.switchTab('shipAssignment'); return false;">Ship Assignments</button>
             <button class="tab-btn" data-tab="aar" id="tab-btn-aar" onclick="window.switchTab('aar'); return false;">After Action Report</button>
-            <button class="tab-btn" data-tab="alertWorkflow" id="tab-btn-alertWorkflow" onclick="window.switchTab('alertWorkflow'); return false;">Alert Workflow</button>
+            <button class="tab-btn" data-tab="workflow" id="tab-btn-workflow" onclick="window.switchTab('workflow'); return false;">Workflow</button>
             <button class="tab-btn" data-tab="settings" id="tab-btn-settings" onclick="window.switchTab('settings'); return false;">Einstellungen</button>
             <button class="tab-btn" data-tab="console" style="display: none;" id="console-tab-btn" onclick="window.switchTab('console'); return false;">Konsole</button>
         </div>
 
         <main>
-            <!-- Alert Workflow Tab -->
-            <div class="tab-content" data-tab="alertWorkflow" style="display: none;">
-                <h2>Alert Workflow</h2>
+            <!-- Workflow Tab -->
+            <div class="tab-content" data-tab="workflow" style="display: none;">
+                <h2>Workflow</h2>
                 <p class="description">
-                    Erstelle und führe visuelle Workflows mit Buttons und Aktionen für Alerts aus.
+                    Erstelle und führe visuelle Workflows mit Buttons und Aktionen aus, die durch Events ausgelöst werden.
                 </p>
 
                 <div class="card">
@@ -637,8 +637,8 @@
                     <h3 style="margin-bottom: 1rem;">Ship Groups</h3>
                     
                     <div class="form-group" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        <input type="text" id="api-status" placeholder="Loading ships..." readonly style="flex: 1; min-width: 150px;">
-                        <button class="btn btn-secondary" onclick="loadShips()">Refresh Ships</button>
+                        <span id="apiStatus" style="flex: 1; min-width: 150px; padding: 0.5rem 0.75rem; border: 1px solid #444; border-radius: 0.375rem; background-color: #1a1a1a; color: #888; font-size: 0.875rem;">Loading ships...</span>
+                        <button class="btn btn-secondary" onclick="refreshShipList()">Refresh Ships</button>
                         <button class="btn btn-secondary" onclick="openImportModal()">Import from Discord</button>
                         <button class="btn btn-primary" onclick="autoFillShipAssignments()">Auto-fill</button>
                         <button class="btn btn-danger" onclick="confirmClearShipAssignments()">Clear All</button>

@@ -322,6 +322,9 @@ function promptPositionEntry() {
 	if (!Number.isInteger(pos) || !Number.isInteger(total) || pos < 1 || total < 1) {
 		return alert('Nur positive Zahlen erlaubt (Format 1/3)');
 	}
+	if (pos > total) {
+		return alert(`Position (${pos}) kann nicht größer als Anzahl Teams (${total}) sein!`);
+	}
 	manualPosition = { pos, total };
 	saveManualPosition();
 	updatePositionDisplay();
@@ -693,6 +696,13 @@ function initializeDOMElements() {
 		teamPositionSaveBtn.addEventListener('click', () => {
 			const pos = parseInt(teamPositionSelect?.value, 10) || 1;
 			const total = parseInt(teamCountSelect?.value, 10) || 1;
+			
+			// Validate that position is not greater than total
+			if (pos > total) {
+				alert(`Position (${pos}) kann nicht größer als Anzahl Teams (${total}) sein!`);
+				return;
+			}
+			
 			manualPosition = { pos, total };
 			saveManualPosition();
 			updatePositionDisplay();

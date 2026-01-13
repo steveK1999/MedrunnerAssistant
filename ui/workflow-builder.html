@@ -1,18 +1,23 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alert Workflow Builder</title>
+    <title>Workflow Builder</title>
     <link rel="stylesheet" href="workflow-builder.css">
 </head>
 <body>
     <div class="builder-container">
         <!-- Header -->
         <header class="builder-header">
-            <h1>Alert Workflow Builder</h1>
+            <h1>Workflow Builder</h1>
             <div class="header-actions">
+                <button id="workflows-list-btn" class="btn btn-info" title="Alle Workflows anzeigen">📋 Workflows</button>
                 <input type="text" id="workflow-name" placeholder="Workflow-Name" class="workflow-name-input">
+                <label class="checkbox-label" style="margin-left: 1rem; color: #fff;">
+                    <input type="checkbox" id="workflow-enabled" checked>
+                    Aktiviert
+                </label>
                 <button id="save-workflow-btn" class="btn btn-primary">Speichern</button>
                 <button id="close-builder-btn" class="btn btn-secondary">Schließen</button>
             </div>
@@ -20,9 +25,78 @@
 
         <!-- Main Content -->
         <div class="builder-main">
-            <!-- Sidebar - Page List -->
+            <!-- Sidebar - Workflow Configuration -->
             <aside class="page-sidebar">
                 <div class="sidebar-header">
+                    <h3>Workflow Trigger</h3>
+                </div>
+                <div class="trigger-config" style="padding: 1rem;">
+                    <div class="form-group">
+                        <label for="trigger-type">Trigger-Typ:</label>
+                        <select id="trigger-type" class="form-control">
+                            <option value="team_join">Person möchte Team beitreten</option>
+                            <option value="chat_message">Neue Chatnachricht</option>
+                            <option value="new_alert">Neuer Alert für Team</option>
+                        </select>
+                    </div>
+                    
+                    <div id="alert-types-container" class="form-group" style="display: none;">
+                        <label>Alert-Typen:</label>
+                        <div class="alert-types-checkboxes">
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="alert-type-checkbox" value="PVE">
+                                PVE
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="alert-type-checkbox" value="PVP">
+                                PVP
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" class="alert-type-checkbox" value="Non-Threat">
+                                Non-Threat
+                            </label>
+                        </div>
+                        <small style="color: #888; display: block; margin-top: 0.5rem;">
+                            Workflow wird nur bei Position 1 getriggert
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Trigger Actions -->
+                <div class="sidebar-header" style="margin-top: 1rem;">
+                    <h3>Trigger Aktionen</h3>
+                </div>
+                <div class="trigger-actions-config" style="padding: 1rem;">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="trigger-action-sound">
+                            Sound abspielen
+                        </label>
+                    </div>
+                    
+                    <div id="sound-selection" class="form-group" style="display: none; margin-top: 0.5rem;">
+                        <label for="trigger-sound-file">Sound Datei:</label>
+                        <select id="trigger-sound-file" class="form-control">
+                            <option value="">-- Wähle einen Sound --</option>
+                            <option value="CUSTOM_ALERT_SOUND">Alert Sound</option>
+                            <option value="CUSTOM_CHATMESSAGE_SOUND">Chat Message Sound</option>
+                            <option value="CUSTOM_TEAMJOIN_SOUND">Team Join Sound</option>
+                            <option value="CUSTOM_UNASSIGNED_SOUND">Unassigned Sound</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="trigger-action-overlay">
+                            Overlay anzeigen
+                        </label>
+                    </div>
+                    <small style="color: #888; display: block; margin-top: 0.5rem;">
+                        Aktionen, die ausgeführt werden wenn der Trigger ausgelöst wird
+                    </small>
+                </div>
+                
+                <div class="sidebar-header" style="margin-top: 1rem;">
                     <h3>Seiten</h3>
                     <button id="add-page-btn" class="btn btn-small" title="Seite hinzufügen">+</button>
                 </div>
@@ -152,6 +226,24 @@
             <div class="modal-footer">
                 <button id="save-action-btn" class="btn btn-primary">Hinzufügen</button>
                 <button id="cancel-action-btn" class="btn btn-secondary">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflows List Modal -->
+    <div id="workflows-modal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2 id="workflows-modal-title">Meine Workflows</h2>
+                <button class="close-modal" id="close-workflows-modal-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <button id="new-workflow-btn" class="btn btn-primary" style="width: 100%;">+ Neuer Workflow</button>
+                </div>
+                <div id="workflows-list" class="workflows-list">
+                    <!-- Workflows will be listed here -->
+                </div>
             </div>
         </div>
     </div>

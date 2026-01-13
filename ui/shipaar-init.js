@@ -9,12 +9,14 @@
 let shipAssignmentModule;
 let aarModule;
 let alertTimerModule;
+let shipsAPIModule;
 
 // Function to initialize the modules
 async function initializeShipAndAARModules() {
     try {
         // Import the modules
         const constants = await import('../lib/constants.js');
+        shipsAPIModule = await import('../lib/shipsAPI.js');
         shipAssignmentModule = await import('../lib/shipAssignment.js');
         aarModule = await import('../lib/aar.js');
         alertTimerModule = await import('../lib/alert-timer.js');
@@ -86,6 +88,17 @@ async function initializeShipAndAARModules() {
         window.getCurrentAlertName = shipAssignmentModule.getCurrentAlertName;
         window.getAlertStartTime = shipAssignmentModule.getAlertStartTime;
         window.clearCurrentAlertName = shipAssignmentModule.clearCurrentAlertName;
+
+        // Expose Ships API functions globally
+        window.initializeShips = shipsAPIModule.initializeShips;
+        window.refreshShipList = shipsAPIModule.refreshShipList;
+        window.getShips = shipsAPIModule.getShips;
+        window.setShips = shipsAPIModule.setShips;
+
+        // Initialize the ships from API
+        console.log('[shipaar-init] Initializing ships from API...');
+        await shipsAPIModule.initializeShips();
+        console.log('[shipaar-init] Ships API initialized, loaded', window.SHIPS.length, 'ships');
 
         // Do NOT load ship assignments on startup - start fresh each session
         // shipAssignmentModule.loadShipAssignments();
