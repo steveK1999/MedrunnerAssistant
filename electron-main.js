@@ -241,6 +241,19 @@ ipcMain.handle("get-assistant-status", async () => {
 	return { running: isRunning };
 });
 
+ipcMain.handle("get-workflow-builder-settings", async () => {
+	// Load settings from settings manager and return language
+	try {
+		const settings = await loadSettings();
+		return {
+			LANGUAGE: settings.LANGUAGE || 'de'
+		};
+	} catch (e) {
+		console.error('[Electron] Failed to get workflow builder settings:', e);
+		return { LANGUAGE: 'de' };
+	}
+});
+
 // Workflow display handlers
 ipcMain.on("workflow-display-ready", (event) => {
 	console.log("[Electron] Workflow display ready");

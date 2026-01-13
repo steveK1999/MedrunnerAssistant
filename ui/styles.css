@@ -599,6 +599,100 @@ details[open] .accordion-icon {
     margin-top: 1rem;
 }
 
+/* Workflows List Styles */
+.workflows-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.workflow-item {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+}
+
+.workflow-item:hover {
+    border-color: #4dabf7;
+    background: #333;
+}
+
+.workflow-item-info {
+    flex: 1;
+}
+
+.workflow-item-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.workflow-item-status {
+    font-size: 0.9rem;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.workflow-item-status.enabled {
+    color: #51cf66;
+}
+
+.workflow-item-status.disabled {
+    color: #ff6b6b;
+}
+
+.workflow-item-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: 1rem;
+}
+
+.workflow-item-actions button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.workflow-toggle-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.workflow-toggle-btn:hover {
+    background-color: #2563eb;
+}
+
+.workflow-delete-btn {
+    background-color: #ef4444;
+    color: white;
+}
+
+.workflow-delete-btn:hover {
+    background-color: #dc2626;
+}
+
+.workflow-test-btn {
+    background-color: #fbbf24;
+    color: #000;
+    font-weight: 600;
+}
+
+.workflow-test-btn:hover {
+    background-color: #f59e0b;
+}
+
 /* Workflow Display Styles */
 .workflow-display {
     min-height: 400px;

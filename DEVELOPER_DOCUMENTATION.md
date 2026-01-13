@@ -372,7 +372,7 @@ previousPage()          // Backward
 
 **Base URLs:**
 - Production: `https://api.medrunner.space`
-- Development: `https://dev-api.medrunner.space`
+- Development: `https://api.medrunner.dev`
 
 **Authentication:**
 ```javascript

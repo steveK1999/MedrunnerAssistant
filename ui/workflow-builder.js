@@ -164,25 +164,29 @@ const translations = {
 };
 
 // Get language from settings
-let currentLang = 'de';
+let currentLang = (() => {
+    try {
+        const settings = localStorage.getItem('settings');
+        if (settings) {
+            const parsed = JSON.parse(settings);
+            if (parsed.LANGUAGE) {
+                const lang = parsed.LANGUAGE.toLowerCase();
+                return (lang === 'en' || lang === 'de') ? lang : 'de';
+            }
+        }
+    } catch (e) {
+        console.warn('[Builder] Could not load language from settings:', e);
+    }
+    return 'de';
+})();
 
 // Storage keys
 const WORKFLOWS_LIST_KEY = 'mrs_workflows_list';
 const CURRENT_WORKFLOW_KEY = 'mrs_current_workflow_id';
 
 function initLanguage() {
-    try {
-        // Try to get language from main window settings
-        const settings = localStorage.getItem('settings');
-        if (settings) {
-            const parsed = JSON.parse(settings);
-            if (parsed.LANGUAGE) {
-                currentLang = parsed.LANGUAGE;
-            }
-        }
-    } catch (e) {
-        console.warn('Could not load language from settings:', e);
-    }
+    // Language is already loaded during module initialization
+    console.log('[Builder] Using language:', currentLang);
     document.documentElement.lang = currentLang;
 }
 
@@ -207,8 +211,19 @@ const TRIGGER_TYPES = {
 const ALERT_TYPES = ['PVE', 'PVP', 'Non-Threat'];
 
 // Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    initLanguage();
+document.addEventListener('DOMContentLoaded', async () => {
+    // Request language from main window via IPC
+    try {
+        const settings = await ipcRenderer.invoke('get-workflow-builder-settings');
+        if (settings && settings.LANGUAGE) {
+            currentLang = settings.LANGUAGE.toLowerCase();
+            console.log('[Builder] Language from main window:', currentLang);
+        }
+    } catch (e) {
+        console.warn('[Builder] Could not get language from main window, using localStorage:', e);
+        initLanguage();
+    }
+    
     initializeBuilder();
     loadWorkflowsList();
     loadOrCreateWorkflow();
@@ -1174,6 +1189,9 @@ function setupEventListeners() {
 
 // Apply translations to HTML elements
 function applyTranslations() {
+    console.log('[Builder] Applying translations for language:', currentLang);
+    console.log('[Builder] Translations available:', Object.keys(translations));
+    
     // Title
     document.title = t('title');
     document.querySelector('h1').textContent = t('title');

@@ -1414,9 +1414,9 @@ let currentWorkflow = null;
 let currentWorkflowPageIndex = 0;
 
 function initializeWorkflow() {
-	// Load workflow from localStorage
+	// Load and render workflows list
 	loadWorkflow();
-	renderWorkflow();
+	renderWorkflowsList();
 	
 	// Setup builder button
 	const openBuilderBtn = document.getElementById('open-builder-btn');
@@ -1425,6 +1425,11 @@ function initializeWorkflow() {
 			const result = await window.api.openWorkflowBuilder();
 			if (!result.success) {
 				console.error('Failed to open workflow builder');
+			} else {
+				// Refresh workflows list after builder closes
+				setTimeout(() => {
+					renderWorkflowsList();
+				}, 500);
 			}
 		};
 	}
@@ -1454,14 +1459,207 @@ function initializeWorkflow() {
 
 function loadWorkflow() {
 	try {
+		// Try new format first
+		const workflowsList = localStorage.getItem('mrs_workflows_list');
+		const currentId = localStorage.getItem('mrs_current_workflow_id');
+		
+		if (workflowsList && currentId) {
+			const workflows = JSON.parse(workflowsList);
+			const workflow = workflows.find(w => w.id === currentId);
+			if (workflow) {
+				currentWorkflow = workflow;
+				currentWorkflowPageIndex = 0;
+				console.log('[Workflow] Loaded (new format):', currentWorkflow.name);
+				return;
+			}
+		}
+		
+		// Fall back to old format
 		const stored = localStorage.getItem('mrs_alert_workflow');
 		if (stored) {
 			currentWorkflow = JSON.parse(stored);
 			currentWorkflowPageIndex = 0;
-			console.log('[Workflow] Loaded:', currentWorkflow.name);
+			console.log('[Workflow] Loaded (legacy format):', currentWorkflow.name);
 		}
 	} catch (e) {
 		console.error('[Workflow] Failed to load:', e);
+	}
+}
+
+function renderWorkflowsList() {
+	const container = document.getElementById('workflows-list-container');
+	
+	try {
+		const workflowsList = localStorage.getItem('mrs_workflows_list');
+		const workflows = workflowsList ? JSON.parse(workflowsList) : [];
+		
+		// Get language setting
+		const lang = getUILanguage();
+		
+		if (workflows.length === 0) {
+			const emptyMsg = lang === 'en' 
+				? 'No workflows available. Open the builder to create a workflow.'
+				: 'Keine Workflows vorhanden. Öffne den Builder, um einen Workflow zu erstellen.';
+			container.innerHTML = `<p style="text-align: center; color: #888; padding: 2rem;">${emptyMsg}</p>`;
+			return;
+		}
+		
+		container.innerHTML = '';
+		
+		workflows.forEach(workflow => {
+			const item = document.createElement('div');
+			item.className = 'workflow-item';
+			
+			// Info section
+			const info = document.createElement('div');
+			info.className = 'workflow-item-info';
+			
+			const name = document.createElement('div');
+			name.className = 'workflow-item-name';
+			name.textContent = workflow.name;
+			info.appendChild(name);
+			
+			const status = document.createElement('div');
+			status.className = `workflow-item-status ${workflow.enabled ? 'enabled' : 'disabled'}`;
+			const statusText = lang === 'en'
+				? (workflow.enabled ? '✓ Enabled' : '✗ Disabled')
+				: (workflow.enabled ? '✓ Aktiviert' : '✗ Deaktiviert');
+			status.innerHTML = `<span>${statusText}</span>`;
+			info.appendChild(status);
+			
+			item.appendChild(info);
+			
+			// Actions section
+			const actions = document.createElement('div');
+			actions.className = 'workflow-item-actions';
+			
+			// Toggle button
+			const toggleBtn = document.createElement('button');
+			toggleBtn.className = 'workflow-toggle-btn';
+			toggleBtn.textContent = lang === 'en'
+				? (workflow.enabled ? 'Disable' : 'Enable')
+				: (workflow.enabled ? 'Deaktivieren' : 'Aktivieren');
+			toggleBtn.onclick = (e) => {
+				e.stopPropagation();
+				toggleWorkflowEnabled(workflow.id, !workflow.enabled);
+			};
+			actions.appendChild(toggleBtn);
+			
+			// Test button (only if TEST_MODE is enabled)
+			const settings = localStorage.getItem('settings');
+			if (settings) {
+				try {
+					const parsed = JSON.parse(settings);
+					if (parsed.TEST_MODE === true || parsed.TEST_MODE === 'true') {
+						const testBtn = document.createElement('button');
+						testBtn.className = 'workflow-test-btn';
+						testBtn.textContent = '🧪 Test';
+						testBtn.title = lang === 'en' ? 'Test workflow' : 'Workflow testen';
+						testBtn.onclick = (e) => {
+							e.stopPropagation();
+							testWorkflowFromList(workflow);
+						};
+						actions.appendChild(testBtn);
+					}
+				} catch (e) {
+					console.warn('Could not check TEST_MODE:', e);
+				}
+			}
+			
+			// Delete button
+			const deleteBtn = document.createElement('button');
+			deleteBtn.className = 'workflow-delete-btn';
+			deleteBtn.textContent = lang === 'en' ? '🗑️ Delete' : '🗑️ Löschen';
+			deleteBtn.onclick = (e) => {
+				e.stopPropagation();
+				deleteWorkflowFromList(workflow.id);
+			};
+			actions.appendChild(deleteBtn);
+			
+			item.appendChild(actions);
+			container.appendChild(item);
+		});
+	} catch (e) {
+		console.error('[Workflow] Failed to render list:', e);
+		container.innerHTML = '<p style="text-align: center; color: #f00; padding: 2rem;">Fehler beim Laden der Workflows.</p>';
+	}
+}
+
+function getUILanguage() {
+	try {
+		const settings = localStorage.getItem('settings');
+		if (settings) {
+			const parsed = JSON.parse(settings);
+			return parsed.LANGUAGE || 'de';
+		}
+	} catch (e) {
+		console.warn('Could not get language:', e);
+	}
+	return 'de';
+}
+
+function toggleWorkflowEnabled(workflowId, enabled) {
+	try {
+		const workflowsList = localStorage.getItem('mrs_workflows_list');
+		const workflows = workflowsList ? JSON.parse(workflowsList) : [];
+		
+		const workflow = workflows.find(w => w.id === workflowId);
+		if (workflow) {
+			workflow.enabled = enabled;
+			localStorage.setItem('mrs_workflows_list', JSON.stringify(workflows));
+			renderWorkflowsList();
+			console.log('[Workflow] Toggled enabled:', workflow.name, enabled);
+		}
+	} catch (e) {
+		console.error('[Workflow] Failed to toggle:', e);
+	}
+}
+
+function deleteWorkflowFromList(workflowId) {
+	const lang = getUILanguage();
+	const confirmMsg = lang === 'en' ? 'Really delete this workflow?' : 'Workflow wirklich löschen?';
+	if (!confirm(confirmMsg)) return;
+	
+	try {
+		const workflowsList = localStorage.getItem('mrs_workflows_list');
+		let workflows = workflowsList ? JSON.parse(workflowsList) : [];
+		
+		workflows = workflows.filter(w => w.id !== workflowId);
+		localStorage.setItem('mrs_workflows_list', JSON.stringify(workflows));
+		
+		// Clear current workflow if it was deleted
+		const currentId = localStorage.getItem('mrs_current_workflow_id');
+		if (currentId === workflowId) {
+			localStorage.removeItem('mrs_current_workflow_id');
+			currentWorkflow = null;
+		}
+		
+		renderWorkflowsList();
+		console.log('[Workflow] Deleted workflow:', workflowId);
+	} catch (e) {
+		console.error('[Workflow] Failed to delete:', e);
+	}
+}
+
+function testWorkflowFromList(workflow) {
+	try {
+		// Use ipcRenderer to send test event to builder/main process
+		const { ipcRenderer } = require('electron');
+		ipcRenderer.send('test-workflow', {
+			workflow: workflow,
+			triggerType: workflow.trigger.type
+		});
+		
+		const lang = getUILanguage();
+		const msg = lang === 'en'
+			? `Workflow "${workflow.name}" is being tested!`
+			: `Workflow "${workflow.name}" wird getestet!`;
+		alert(msg);
+	} catch (e) {
+		console.error('[Workflow] Failed to test:', e);
+		const lang = getUILanguage();
+		const errMsg = lang === 'en' ? 'Error testing workflow' : 'Fehler beim Testen des Workflows';
+		alert(errMsg);
 	}
 }
 
@@ -1579,6 +1777,7 @@ async function executeWorkflowButton(button) {
 window.api.onWorkflowUpdated((workflow) => {
 	console.log('[Workflow] Updated from builder');
 	currentWorkflow = workflow;
+	renderWorkflowsList();
 	renderWorkflow();
 });
 

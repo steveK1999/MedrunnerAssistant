@@ -50,28 +50,18 @@
 
                 <div class="card">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                        <h3>Workflow Steuerung</h3>
+                        <h3>Meine Workflows</h3>
                         <button id="open-builder-btn" class="btn btn-primary">
                             <span style="margin-right: 0.5rem;">⚙️</span>
                             Workflow Builder öffnen
                         </button>
                     </div>
 
-                    <!-- Workflow Display Area -->
-                    <div id="workflow-display" class="workflow-display">
-                        <div class="workflow-page" id="current-workflow-page">
-                            <div class="page-number-display" id="workflow-page-number">Seite 1</div>
-                            <div id="workflow-buttons-container" class="workflow-buttons">
-                                <p style="text-align: center; color: #888; padding: 2rem;">
-                                    Kein Workflow geladen. Öffne den Builder, um einen Workflow zu erstellen.
-                                </p>
-                            </div>
-                            <div class="workflow-nav" id="workflow-navigation" style="display: none;">
-                                <button id="workflow-prev-btn" class="btn btn-nav">←</button>
-                                <span id="workflow-page-indicator">1 / 1</span>
-                                <button id="workflow-next-btn" class="btn btn-nav">→</button>
-                            </div>
-                        </div>
+                    <!-- Workflows List -->
+                    <div id="workflows-list-container" class="workflows-list">
+                        <p style="text-align: center; color: #888; padding: 2rem;">
+                            Keine Workflows vorhanden. Öffne den Builder, um einen Workflow zu erstellen.
+                        </p>
                     </div>
                 </div>
             </div>
