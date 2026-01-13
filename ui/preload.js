@@ -30,3 +30,20 @@ contextBridge.exposeInMainWorld("api", {
 		ipcRenderer.on("menu-save", () => callback());
 	},
 });
+// Expose electronAPI for workflow communication
+contextBridge.exposeInMainWorld("electronAPI", {
+	send: (channel, data) => {
+		// Whitelist channels
+		const validChannels = ['workflow-triggered', 'open-workflow-window', 'workflow-timer-action', 'workflow-display-ready'];
+		if (validChannels.includes(channel)) {
+			ipcRenderer.send(channel, data);
+		}
+	},
+	on: (channel, callback) => {
+		// Whitelist channels
+		const validChannels = ['workflow-data', 'navigate-to-page', 'workflow-timer-action'];
+		if (validChannels.includes(channel)) {
+			ipcRenderer.on(channel, (event, ...args) => callback(...args));
+		}
+	}
+});

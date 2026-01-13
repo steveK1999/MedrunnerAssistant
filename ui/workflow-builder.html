@@ -91,8 +91,33 @@
                             Overlay anzeigen
                         </label>
                     </div>
+                    
+                    <div id="overlay-color-selection" class="form-group" style="display: none; margin-top: 0.5rem;">
+                        <label for="trigger-overlay-color">Overlay-Farbe:</label>
+                        <input type="color" id="trigger-overlay-color" class="form-control" value="#ff0000" style="width: 100px; height: 40px; cursor: pointer;">
+                    </div>
+                    
                     <small style="color: #888; display: block; margin-top: 0.5rem;">
                         Aktionen, die ausgeführt werden wenn der Trigger ausgelöst wird
+                    </small>
+                </div>
+
+                <!-- Display Settings -->
+                <div class="sidebar-header" style="margin-top: 1rem;">
+                    <h3>Anzeige-Einstellungen</h3>
+                </div>
+                <div class="display-settings-config" style="padding: 1rem;">
+                    <div class="form-group">
+                        <label for="target-display">Ziel-Bildschirm:</label>
+                        <select id="target-display" class="form-control">
+                            <option value="0">Primärer Bildschirm</option>
+                            <option value="1">Sekundärer Bildschirm 1</option>
+                            <option value="2">Sekundärer Bildschirm 2</option>
+                            <option value="3">Sekundärer Bildschirm 3</option>
+                        </select>
+                    </div>
+                    <small style="color: #888; display: block; margin-top: 0.5rem;">
+                        Bildschirm auf dem das Workflow-Fenster erscheint (nur wenn Workflow Seiten hat)
                     </small>
                 </div>
                 

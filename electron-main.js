@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 let mainWindow = null;
+let workflowWindow = null;
 let assistantProcess = null;
 let isRunning = false;
 
@@ -79,6 +80,54 @@ function createWindow() {
 	mainWindow.on("closed", () => {
 		mainWindow = null;
 	});
+}
+
+// Create workflow display window
+function createWorkflowWindow(workflow, targetDisplay = 0) {
+	// Close existing workflow window if any
+	if (workflowWindow) {
+		workflowWindow.close();
+		workflowWindow = null;
+	}
+	
+	// Get all displays
+	const { screen } = require('electron');
+	const displays = screen.getAllDisplays();
+	
+	// Select target display (default to primary if target doesn't exist)
+	let targetScreen = displays[0];
+	if (targetDisplay > 0 && targetDisplay < displays.length) {
+		targetScreen = displays[targetDisplay];
+	}
+	
+	const { x, y, width, height } = targetScreen.bounds;
+	
+	workflowWindow = new BrowserWindow({
+		x: x + 50,
+		y: y + 50,
+		width: Math.min(1000, width - 100),
+		height: Math.min(700, height - 100),
+		webPreferences: {
+			nodeIntegration: false,
+			contextIsolation: true,
+			preload: path.join(__dirname, "ui", "preload.js"),
+		},
+		autoHideMenuBar: true,
+		title: workflow.name || 'Workflow',
+	});
+	
+	workflowWindow.loadFile(path.join(__dirname, "ui", "workflow-display.html"));
+	
+	// Send workflow data when window is ready
+	workflowWindow.webContents.on('did-finish-load', () => {
+		workflowWindow.webContents.send('workflow-data', workflow);
+	});
+	
+	workflowWindow.on("closed", () => {
+		workflowWindow = null;
+	});
+	
+	return workflowWindow;
 }
 
 // Start the Medrunner Assistant background service
@@ -190,6 +239,24 @@ ipcMain.handle("stop-assistant", async () => {
 
 ipcMain.handle("get-assistant-status", async () => {
 	return { running: isRunning };
+});
+
+// Workflow display handlers
+ipcMain.on("workflow-display-ready", (event) => {
+	console.log("[Electron] Workflow display ready");
+});
+
+ipcMain.on("open-workflow-window", (event, workflow) => {
+	console.log("[Electron] Opening workflow window:", workflow.name);
+	const targetDisplay = workflow.displaySettings?.targetDisplay || 0;
+	createWorkflowWindow(workflow, targetDisplay);
+});
+
+ipcMain.on("workflow-timer-action", (event, action) => {
+	// Forward timer action to main window
+	if (mainWindow) {
+		mainWindow.webContents.send('workflow-timer-action', action);
+	}
 });
 
 // App lifecycle

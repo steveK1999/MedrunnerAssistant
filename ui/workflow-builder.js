@@ -73,7 +73,14 @@ const translations = {
         soundTeamJoin: 'Team Join Sound',
         soundUnassigned: 'Unassigned Sound',
         showOverlay: 'Overlay anzeigen',
-        triggerActionsNote: 'Aktionen, die ausgeführt werden wenn der Trigger ausgelöst wird'
+        triggerActionsNote: 'Aktionen, die ausgeführt werden wenn der Trigger ausgelöst wird',
+        displaySettings: 'Anzeige-Einstellungen',
+        targetDisplay: 'Ziel-Bildschirm:',
+        primaryDisplay: 'Primärer Bildschirm',
+        secondaryDisplay: 'Sekundärer Bildschirm',
+        displayNote: 'Bildschirm auf dem das Workflow-Fenster erscheint (nur wenn Workflow Seiten hat)',
+        overlayColor: 'Overlay-Farbe:',
+        overlayColorNote: 'Farbe des Alert-Overlays (Standard: Rot)'
     },
     en: {
         title: 'Workflow Builder',
@@ -141,7 +148,14 @@ const translations = {
         soundTeamJoin: 'Team Join Sound',
         soundUnassigned: 'Unassigned Sound',
         showOverlay: 'Show Overlay',
-        triggerActionsNote: 'Actions that are executed when the trigger is activated'
+        triggerActionsNote: 'Actions that are executed when the trigger is activated',
+        displaySettings: 'Display Settings',
+        targetDisplay: 'Target Display:',
+        primaryDisplay: 'Primary Display',
+        secondaryDisplay: 'Secondary Display',
+        displayNote: 'Display where the workflow window appears (only if workflow has pages)',
+        overlayColor: 'Overlay Color:',
+        overlayColorNote: 'Color of the alert overlay (Default: Red)'
     }
 };
 
@@ -268,12 +282,16 @@ function createNewWorkflow() {
             actions: {
                 playSound: false,
                 soundFile: 'CUSTOM_ALERT_SOUND',
-                showOverlay: false
+                showOverlay: false,
+                overlayColor: '#ff0000'
             }
         },
         pages: [
             { id: 1, buttons: [] }
         ],
+        displaySettings: {
+            targetDisplay: 0  // 0 = primary display, 1+ = secondary displays
+        },
         createdAt: Date.now(),
         updatedAt: Date.now()
     };
@@ -330,9 +348,16 @@ function loadOrCreateWorkflow() {
     if (!currentWorkflow.trigger.actions.soundFile) {
         currentWorkflow.trigger.actions.soundFile = 'CUSTOM_ALERT_SOUND';
     }
+    if (!currentWorkflow.trigger.actions.overlayColor) {
+        currentWorkflow.trigger.actions.overlayColor = '#ff0000';
+    }
+    if (!currentWorkflow.displaySettings) {
+        currentWorkflow.displaySettings = { targetDisplay: 0 };
+    }
     
     document.getElementById('workflow-name').value = currentWorkflow.name;
     document.getElementById('workflow-enabled').checked = currentWorkflow.enabled;
+    document.getElementById('target-display').value = currentWorkflow.displaySettings?.targetDisplay || 0;
     updateTriggerUI();
     renderPageList();
     renderCurrentPage();
@@ -355,13 +380,22 @@ function saveWorkflow() {
     
     // Save trigger actions
     if (!currentWorkflow.trigger.actions) {
-        currentWorkflow.trigger.actions = { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false };
+        currentWorkflow.trigger.actions = { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false, overlayColor: '#ff0000' };
     }
     const soundCheckbox = document.getElementById('trigger-action-sound');
     const soundFileSelect = document.getElementById('trigger-sound-file');
+    const overlayColorInput = document.getElementById('trigger-overlay-color');
     currentWorkflow.trigger.actions.playSound = soundCheckbox ? soundCheckbox.checked : false;
     currentWorkflow.trigger.actions.soundFile = soundFileSelect ? soundFileSelect.value : 'CUSTOM_ALERT_SOUND';
     currentWorkflow.trigger.actions.showOverlay = document.getElementById('trigger-action-overlay').checked;
+    currentWorkflow.trigger.actions.overlayColor = overlayColorInput ? overlayColorInput.value : '#ff0000';
+    
+    // Save display settings
+    if (!currentWorkflow.displaySettings) {
+        currentWorkflow.displaySettings = {};
+    }
+    const targetDisplaySelect = document.getElementById('target-display');
+    currentWorkflow.displaySettings.targetDisplay = targetDisplaySelect ? parseInt(targetDisplaySelect.value) : 0;
     
     // Save to list
     if (!saveWorkflowToList(currentWorkflow)) {
@@ -556,20 +590,28 @@ function updateTriggerUI() {
 }
 
 function updateTriggerActions() {
-    const actions = currentWorkflow.trigger.actions || { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false };
+    const actions = currentWorkflow.trigger.actions || { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false, overlayColor: '#ff0000' };
     
     const soundCheckbox = document.getElementById('trigger-action-sound');
     const overlayCheckbox = document.getElementById('trigger-action-overlay');
     const soundFileSelect = document.getElementById('trigger-sound-file');
     const soundSelection = document.getElementById('sound-selection');
+    const overlayColorInput = document.getElementById('trigger-overlay-color');
+    const overlayColorSelection = document.getElementById('overlay-color-selection');
     
     if (soundCheckbox) soundCheckbox.checked = actions.playSound || false;
     if (overlayCheckbox) overlayCheckbox.checked = actions.showOverlay || false;
     if (soundFileSelect) soundFileSelect.value = actions.soundFile || 'CUSTOM_ALERT_SOUND';
+    if (overlayColorInput) overlayColorInput.value = actions.overlayColor || '#ff0000';
     
     // Show/hide sound selection based on playSound checkbox
     if (soundSelection) {
         soundSelection.style.display = actions.playSound ? 'block' : 'none';
+    }
+    
+    // Show/hide overlay color selection based on showOverlay checkbox
+    if (overlayColorSelection) {
+        overlayColorSelection.style.display = actions.showOverlay ? 'block' : 'none';
     }
 }
 
@@ -583,24 +625,37 @@ function onTriggerTypeChange() {
 
 function onTriggerActionChange() {
     if (!currentWorkflow.trigger.actions) {
-        currentWorkflow.trigger.actions = { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false };
+        currentWorkflow.trigger.actions = { playSound: false, soundFile: 'CUSTOM_ALERT_SOUND', showOverlay: false, overlayColor: '#ff0000' };
     }
     
     const soundCheckbox = document.getElementById('trigger-action-sound');
     const soundFileSelect = document.getElementById('trigger-sound-file');
     const soundSelection = document.getElementById('sound-selection');
+    const overlayCheckbox = document.getElementById('trigger-action-overlay');
+    const overlayColorInput = document.getElementById('trigger-overlay-color');
+    const overlayColorSelection = document.getElementById('overlay-color-selection');
     
     currentWorkflow.trigger.actions.playSound = soundCheckbox ? soundCheckbox.checked : false;
-    currentWorkflow.trigger.actions.showOverlay = document.getElementById('trigger-action-overlay').checked;
+    currentWorkflow.trigger.actions.showOverlay = overlayCheckbox ? overlayCheckbox.checked : false;
     
     // Update soundFile when playSound is toggled
     if (soundCheckbox && soundCheckbox.checked && soundFileSelect) {
         currentWorkflow.trigger.actions.soundFile = soundFileSelect.value;
     }
     
+    // Update overlay color
+    if (overlayColorInput) {
+        currentWorkflow.trigger.actions.overlayColor = overlayColorInput.value;
+    }
+    
     // Show/hide sound selection based on playSound checkbox
     if (soundSelection) {
         soundSelection.style.display = (soundCheckbox && soundCheckbox.checked) ? 'block' : 'none';
+    }
+    
+    // Show/hide overlay color selection based on showOverlay checkbox
+    if (overlayColorSelection) {
+        overlayColorSelection.style.display = (overlayCheckbox && overlayCheckbox.checked) ? 'block' : 'none';
     }
 }
 
@@ -1004,9 +1059,11 @@ function setupEventListeners() {
     const soundCheckbox = document.getElementById('trigger-action-sound');
     const overlayCheckbox = document.getElementById('trigger-action-overlay');
     const soundFileSelect = document.getElementById('trigger-sound-file');
+    const overlayColorInput = document.getElementById('trigger-overlay-color');
     if (soundCheckbox) soundCheckbox.onchange = onTriggerActionChange;
     if (overlayCheckbox) overlayCheckbox.onchange = onTriggerActionChange;
     if (soundFileSelect) soundFileSelect.onchange = onTriggerActionChange;
+    if (overlayColorInput) overlayColorInput.oninput = onTriggerActionChange;
     
     // Page management
     document.getElementById('add-page-btn').onclick = addPage;
@@ -1066,8 +1123,23 @@ function applyTranslations() {
     document.querySelector('h1').textContent = t('title');
     
     // Header
+    const workflowsListBtn = document.getElementById('workflows-list-btn');
+    if (workflowsListBtn) {
+        workflowsListBtn.title = currentLang === 'en' ? 'Show all workflows' : 'Alle Workflows anzeigen';
+    }
     document.getElementById('workflow-name').placeholder = t('workflowName');
-    document.querySelector('label[for="workflow-enabled"]').childNodes[2].textContent = ' ' + t('enabled');
+    // Find the checkbox label and update its text content
+    const enabledLabel = document.querySelector('.checkbox-label');
+    if (enabledLabel && enabledLabel.querySelector('input#workflow-enabled')) {
+        // Update just the text node, not the checkbox
+        const textNode = Array.from(enabledLabel.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+        if (textNode) {
+            textNode.textContent = t('enabled');
+        } else {
+            // If no text node, add it after the checkbox
+            enabledLabel.appendChild(document.createTextNode(t('enabled')));
+        }
+    }
     document.getElementById('save-workflow-btn').textContent = t('save');
     document.getElementById('close-builder-btn').textContent = t('close');
     
@@ -1079,9 +1151,18 @@ function applyTranslations() {
     const triggerActionsHeader = document.querySelectorAll('.sidebar-header h3')[1];
     if (triggerActionsHeader) triggerActionsHeader.textContent = t('triggerActions');
     
-    const soundLabel = document.querySelector('label[for="trigger-action-sound"]');
-    if (soundLabel) {
-        soundLabel.textContent = t('playSound');
+    const soundCheckboxLabel = document.querySelector('label[for="trigger-action-sound"]');
+    if (!soundCheckboxLabel) {
+        // Find by checkbox input
+        const soundCheckbox = document.getElementById('trigger-action-sound');
+        if (soundCheckbox && soundCheckbox.parentElement && soundCheckbox.parentElement.classList.contains('checkbox-label')) {
+            const textNode = Array.from(soundCheckbox.parentElement.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.textContent = t('playSound');
+            }
+        }
+    } else {
+        soundCheckboxLabel.textContent = t('playSound');
     }
     
     const soundFileLabel = document.querySelector('label[for="trigger-sound-file"]');
@@ -1089,14 +1170,29 @@ function applyTranslations() {
         soundFileLabel.textContent = t('soundFile');
     }
     
-    const overlayLabel = document.querySelector('label[for="trigger-action-overlay"]');
-    if (overlayLabel) {
-        overlayLabel.textContent = t('showOverlay');
+    const overlayCheckboxLabel = document.querySelector('label[for="trigger-action-overlay"]');
+    if (!overlayCheckboxLabel) {
+        // Find by checkbox input
+        const overlayCheckbox = document.getElementById('trigger-action-overlay');
+        if (overlayCheckbox && overlayCheckbox.parentElement && overlayCheckbox.parentElement.classList.contains('checkbox-label')) {
+            const textNode = Array.from(overlayCheckbox.parentElement.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+            if (textNode) {
+                textNode.textContent = t('showOverlay');
+            }
+        }
+    } else {
+        overlayCheckboxLabel.textContent = t('showOverlay');
     }
     
     const triggerActionsNote = document.querySelector('.trigger-actions-config small');
     if (triggerActionsNote) {
         triggerActionsNote.textContent = t('triggerActionsNote');
+    }
+    
+    // Overlay color label
+    const overlayColorLabel = document.querySelector('label[for="trigger-overlay-color"]');
+    if (overlayColorLabel) {
+        overlayColorLabel.textContent = t('overlayColor');
     }
     
     // Sound file options
@@ -1121,8 +1217,25 @@ function applyTranslations() {
     const positionNote = document.querySelector('#alert-types-container small');
     if (positionNote) positionNote.textContent = t('positionNote');
     
+    // Display settings
+    const displaySettingsHeader = document.querySelectorAll('.sidebar-header h3')[2];
+    if (displaySettingsHeader) displaySettingsHeader.textContent = t('displaySettings');
+    const targetDisplayLabel = document.querySelector('label[for="target-display"]');
+    if (targetDisplayLabel) targetDisplayLabel.textContent = t('targetDisplay');
+    const displayNote = document.querySelector('.display-settings-config small');
+    if (displayNote) displayNote.textContent = t('displayNote');
+    
+    // Update display options
+    const targetDisplaySelect = document.getElementById('target-display');
+    if (targetDisplaySelect) {
+        targetDisplaySelect.options[0].textContent = t('primaryDisplay');
+        for (let i = 1; i < targetDisplaySelect.options.length; i++) {
+            targetDisplaySelect.options[i].textContent = `${t('secondaryDisplay')} ${i}`;
+        }
+    }
+    
     // Pages section
-    document.querySelectorAll('.sidebar-header h3')[2].textContent = t('pages');
+    document.querySelectorAll('.sidebar-header h3')[3].textContent = t('pages');
     document.getElementById('add-page-btn').title = t('addPage');
     
     // Page editor
